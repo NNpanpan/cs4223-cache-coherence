@@ -1,6 +1,9 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include <fstream>
+#include <string>
+
 #include "Cache.h"
 
 /*
@@ -13,16 +16,24 @@ public:
     int execCycles;
     int compCycles;
     int idleCycles;
+    int loadStoreInstCount;
 
-    // Instruc Q: Either maintains a file pointer, or read all
+    // Instruc Q
+    std::ifstream ifs;
     int isFree;
     int nextFreeCycle;
     Cache* cache;
 
-    Core(const Cache* & cache_ptr);
-    int computeOthers(const int & cycles) const;
-    int prRd(const int & addr) const;
-    int prWr(const int & addr) const;
+    Core(const string & filepath, Cache* cache_ptr);
+    ~Core();
+
+    int incrCycles(const int & cycles);
+
+    int computeOthers(const int & cycles);
+    int prRd(const int & addr);
+    int prWr(const int & addr);
+
+    void finaliseStats();
 };
 
 #endif

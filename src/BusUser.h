@@ -8,9 +8,9 @@ Class BusUser:
 
 class BusUser {
 public:
-    int BusUpdate(const BusUser & requestor, const int & addr) const;
-    int BusRd(const BusUser & requestor, const int & addr) const;
-    int BusRdX(const BusUser & requestor, const int & addr) const;
+    int busUpdate(const BusUser & requestor, const int & addr) const;
+    int busRd(const BusUser & requestor, const int & addr) const;
+    int busRdX(const BusUser & requestor, const int & addr) const;
     int flush(const int & addr) const;
 };
 

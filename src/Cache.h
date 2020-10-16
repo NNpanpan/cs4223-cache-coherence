@@ -26,14 +26,17 @@ public:
     int associativity;
     int blockSize;
     int cacheSize;
-    vector<pair<string, vector<int>>> entries; // cache entries
+    int setCount;
+    vector<vector<pair<string, vector<int>>>> entries; // cache entries
     vector<int> lastUsed; // last used block for each set
     BusUser* busUser;
 
     Cache(const int & assoc, const int & blockSize, const int & cacheSize);
+    void updateState(const int & addr, string new_state);
+    void setBusUser(BusUser* busUser);
     int prRd(const int & addr) const; // calls busRd on busUser
     int prWr(const int & addr) const; // calls busRdX or busUpdate on busUser
-    int flush() const; // calls blush on busUser
+    int flush(const int & addr) const; // calls blush on busUser
 };
 
 #endif
