@@ -32,7 +32,11 @@ public:
     BusUser* busUser;
 
     Cache(const int & assoc, const int & blockSize, const int & cacheSize);
-    void updateState(const int & addr, string new_state);
+    
+    void allocEntry(const int & addr);
+    int hasEntry(const int & addr) const;
+    
+    void updateState(const int & addr, string newState);
     void setBusUser(BusUser* busUser);
     int prRd(const int & addr) const; // calls busRd on busUser
     int prWr(const int & addr) const; // calls busRdX or busUpdate on busUser
