@@ -13,14 +13,14 @@ Class Bus:
 
 class Bus {
 public:
-    vector<BusUser> busUsers; // all BusUsers
+    vector<BusUser*> busUsers; // all BusUsers
     int userCount;
     int trafficData;
     int invalidateCount;
     int updateCount;
 
     Bus(const int & userCount);
-    void addBusUser(const BusUser & busUser);
+    void addBusUser(BusUser* busUser, const int & pos);
     int busUpdate(const BusUser & requestor, const int & addr) const;
     int busRd(const BusUser & requestor, const int & addr) const;
     int busRdX(const BusUser & requestor, const int & addr) const; // should invalidate

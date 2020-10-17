@@ -1,5 +1,8 @@
 #include <bits/stdc++.h>
 #include "src/Bus.h" ///test include subdir header
+#include "src/BusUser.h"
+#include "src/Cache.h"
+#include "src/Core.h"
 
 using namespace std;
 
@@ -36,6 +39,22 @@ vector<vector<CoreCmd>> readBenchmark(string benchmark) {
     return coreCmd;
 }
 
+Bus createBus(int num) {
+    return Bus(num);
+}
+
+vector<BusUser> createBusUsers(int num) {
+    return vector<BusUser>(4, BusUser());
+}
+
+vector<Cache> createCaches(int num, int cacheSize, int assoc, int blockSize) {
+    return vector<Cache>(4, Cache(assoc, blockSize, cacheSize));
+}
+
+Core createCore(Cache* cache_ptr) {
+    return Core(cache_ptr);   
+}
+
 int main(int argc, char **argv) {
     if (argc != 6) {
         cerr << ("Expect argument of form: protocol benchmark cache_size associativity block_size");
@@ -49,5 +68,15 @@ int main(int argc, char **argv) {
     int blockSize = strtol(argv[5], NULL, 0);
 
     vector<vector<CoreCmd>> coreCmd = readBenchmark(benchmark);
+    vector<BusUser> busUsers = createBusUsers(4);
+    vector<Cache> caches = createCaches(4, cacheSize, assoc, blockSize);
+    Bus bus = createBus(4);
+    vector<Core> cores;
 
+    for (int i = 0; i < 4; i++) {
+        // set BusUsers to Cache
+        caches[i].setBusUser(&busUsers[i]);
+        bus.addBusUser(&busUsers[i], i);
+        cores.push_back(createCore(&caches[i]));
+    }
 }

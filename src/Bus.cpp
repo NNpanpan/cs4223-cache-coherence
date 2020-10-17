@@ -5,11 +5,11 @@ using namespace std;
 
 Bus::Bus(const int & userCount) {
     this->userCount = userCount;
-    this->busUsers = vector<BusUser>(userCount);
+    this->busUsers = vector<BusUser*>(userCount);
 }
 
-void Bus::addBusUser(const BusUser & busUser) {
-    (this->busUsers).push_back(busUser);
+void Bus::addBusUser(BusUser* busUser, const int & pos) {
+    busUsers[pos] = busUser;
 }
 
 int Bus::busUpdate(const BusUser & requestor, const int & addr) const {

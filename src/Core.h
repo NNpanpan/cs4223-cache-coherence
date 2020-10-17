@@ -1,7 +1,6 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include <fstream>
 #include <string>
 
 #include "Cache.h"
@@ -18,16 +17,15 @@ public:
     int idleCycles;
     int loadStoreInstCount;
 
-    // Instruc Q
-    std::ifstream ifs;
+    // Instruc Q is external
     int isFree;
     int nextFreeCycle;
     Cache* cache;
 
-    Core(const string & filepath, Cache* cache_ptr);
-    ~Core();
+    Core(Cache* cache_ptr);
 
     int incrCycles(const int & cycles);
+    int execCmd(const int & cmdType, const int & info);
 
     int computeOthers(const int & cycles);
     int prRd(const int & addr);
