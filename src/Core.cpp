@@ -10,45 +10,75 @@ Core::Core(Cache* cache_ptr) {
     cache = cache_ptr;
 }
 
-int Core::incrCycles(const int & cycles) {
+void Core::incrExecCycles(const int & cycles) {
     execCycles += cycles;
-    return cycles;
+}
+
+int Core::getExecCycles() {
+    return execCycles;
+}
+
+void Core::incrCompCycles(const int & cycles) {
+    compCycles += cycles;
+}
+
+int Core::getCompCycles() {
+    return compCycles;
+}
+
+void Core::incrIdleCycles(const int & cycles) {
+    idleCycles += cycles;
+}
+
+int Core::getIdleCycles() {
+    return idleCycles;
+}
+
+void Core::incrLSInstCount() {
+    loadStoreInstCount++;
+}
+
+int Core::getLSInstCount() {
+    return loadStoreInstCount;
 }
 
 int Core::execCmd(const int & cmdType, const int & info) {
     switch (cmdType) {
         case 0:
             int cost = prRd(info);
-            nextFreeCycle = execCycles + cost;
+            incrIdleCycles(cost);
+            incrExecCycles(cost);
+            setNextFreeCycle(execCycles);
             return cost;
         case 1:
             int cost = prWr(info);
-            nextFreeCycle = execCycles + cost;
+            incrIdleCycles(cost);
+            incrExecCycles(cost);
+            setNextFreeCycle(execCycles);
             return cost;
         case 2:
             int cost = computeOthers(info);
-            nextFreeCycle = execCycles + cost;
+            incrCompCycles(cost);
+            incrExecCycles(cost);
+            setNextFreeCycle(execCycles);
             return cost;
         default:
-            return -1;
+            return 0;
     }
 }
 
 int Core::computeOthers(const int & cycles) {
-    compCycles += cycles;
     isFree = 0;
     
     return cycles;
 }
 
 int Core::prRd(const int & addr) {
-    loadStoreInstCount++;
     isFree = 0;
     return cache->prRd(addr);
 }
 
 int Core::prWr(const int & addr) {
-    loadStoreInstCount++;
     isFree = 0;
     return cache->prWr(addr);
 }

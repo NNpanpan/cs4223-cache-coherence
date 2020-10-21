@@ -23,7 +23,20 @@ private:
 public:
     Core(Cache* cache_ptr);
 
-    int incrCycles(const int & cycles);
+    void incrExecCycles(const int & cycles);
+    int getExecCycles();
+    void incrCompCycles(const int & cycles);
+    int getCompCycles();
+    void incrIdleCycles(const int & cycles);
+    int getIdleCycles();
+    void incrLSInstCount();
+    int getLSInstCount();
+
+    void setIsFree(const int & val);
+    int getIsFree();
+    void setNextFreeCycle(const int & cycle);
+
+    
     int execCmd(const int & cmdType, const int & info);
 
     int computeOthers(const int & cycles);
