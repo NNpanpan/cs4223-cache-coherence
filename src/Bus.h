@@ -12,19 +12,26 @@ Class Bus:
 */
 
 class Bus {
-public:
+private:
     vector<BusUser*> busUsers; // all BusUsers
     int userCount;
     int trafficData;
     int invalidateCount;
     int updateCount;
 
+public:
     Bus(const int & userCount);
+
     void addBusUser(BusUser* busUser, const int & pos);
-    int busUpdate(const BusUser & requestor, const int & addr) const;
-    int busRd(const BusUser & requestor, const int & addr) const;
-    int busRdX(const BusUser & requestor, const int & addr) const; // should invalidate
-    int flush(const int & addr) const;
+
+    void incrTrafficData(const int & amount);
+    int getTrafficData();
+    void incrInvalidateCount();
+    int getInvalidateCount();
+    void incrUpdateCount();
+    int getUpdateCount();
+
+    int findEntry(const int & addr);
 };
 
 #endif

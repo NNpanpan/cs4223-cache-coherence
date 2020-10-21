@@ -58,8 +58,14 @@ int Cache::getSharedHits() {
     return sharedHits;
 }
 
-void Cache::setLastUsed(const int & setNum, const int & blockNum) {
-    lastUsed[setNum] = blockNum;
+int Cache::getBlockWordCount() {
+    return blockSize/4;
+}
+
+void Cache::setLastUsed(const int & addr) {
+    int setNum = (addr / blockSize) % setCount;
+    int posInBlock = addr % blockSize;
+    auto set = entries[setNum];
 }
 
 void Cache::allocEntry(const int & addr) {
@@ -131,5 +137,8 @@ int Cache::prWr(const int & addr) {
 }
 
 int Cache::flush(const int & addr) {
-    return updateState(addr, "I");
+    // if block exists, vacate successfully and access memory
+    // return 100 - memory access cost
+    // otherwise, return 0
+    return updateState(addr, "I") ? 100 : 0;
 }

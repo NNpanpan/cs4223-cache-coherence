@@ -12,19 +12,36 @@ void Bus::addBusUser(BusUser* busUser, const int & pos) {
     busUsers[pos] = busUser;
 }
 
-int Bus::busUpdate(const BusUser & requestor, const int & addr) const {
-    return -1;
+void Bus::incrTrafficData(const int & amount) {
+    trafficData += amount;
 }
 
-int Bus::busRd(const BusUser & requestor, const int & addr) const {
-    return -1;
+int Bus::getTrafficData() {
+    return trafficData;
 }
 
-int Bus::busRdX(const BusUser & requestor, const int & addr) const {
-    return -1;
+void Bus::incrInvalidateCount() {
+    invalidateCount++;
 }
 
-int Bus::flush(const int & addr) const {
-    // May return the number of cycles to access memory
-    return 100;
+int Bus::getInvalidateCount() {
+    return invalidateCount;
+}
+
+void Bus::incrUpdateCount() {
+    updateCount++;
+}
+
+int Bus::getUpdateCount() {
+    return updateCount;
+}
+
+int Bus::findEntry(const int & addr) {
+    for (auto bU : busUsers) {
+        if (bU->hasEntry(addr)) {
+            return 1;
+        }
+    }
+
+    return 0;
 }

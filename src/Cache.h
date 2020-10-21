@@ -41,17 +41,18 @@ public:
     int getPrivateHits();
     void incrSharedHits();
     int getSharedHits();
+    int getBlockWordCount();
 
-    void setLastUsed(const int & setNum, const int & blockNum);
+    void setLastUsed(const int & addr);
 
     
     void allocEntry(const int & addr);
-    int hasEntry(const int & addr) const;
+    int hasEntry(const int & addr) const override;
     
     int updateState(const int & addr, string newState);
 
-    int prRd(const int & addr); 
-    int prWr(const int & addr);
+    virtual int prRd(const int & addr); 
+    virtual int prWr(const int & addr);
     int flush(const int & addr);
 };
 

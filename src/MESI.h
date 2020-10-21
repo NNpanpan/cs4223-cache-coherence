@@ -8,7 +8,7 @@ Class MESI:
     - Implements MESI cache coherence protocol
 */
 
-class MESI: public CCProtocol {
+class MESI : public CCProtocol {
 public:
     void nextState(const Cache* cache);
     void prRd(const Cache* cache, const int & addr);

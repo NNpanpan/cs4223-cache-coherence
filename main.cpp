@@ -39,17 +39,6 @@ vector<vector<CoreCmd>> readBenchmark(string benchmark) {
     return coreCmd;
 }
 
-Bus createBus(int num) {
-    return Bus(num);
-}
-
-vector<Cache> createCaches(int num, int cacheSize, int assoc, int blockSize) {
-    return vector<Cache>(4, Cache(assoc, blockSize, cacheSize));
-}
-
-Core createCore(Cache* cache_ptr) {
-    return Core(cache_ptr);   
-}
 
 int main(int argc, char **argv) {
     if (argc != 6) {
