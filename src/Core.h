@@ -9,7 +9,7 @@ Class Core:
 */
 
 class Core {
-public:
+private:
     int execCycles;
     int compCycles;
     int idleCycles;
@@ -20,6 +20,7 @@ public:
     int nextFreeCycle;
     Cache* cache;
 
+public:
     Core(Cache* cache_ptr);
 
     int incrCycles(const int & cycles);

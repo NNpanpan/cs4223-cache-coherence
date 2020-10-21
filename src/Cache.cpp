@@ -26,6 +26,42 @@ Cache::Cache(const int & assoc, const int & blockSize, const int & cacheSize) {
     }
 }
 
+void Cache::incrHit() {
+    hitNum++;
+}
+
+int Cache::getHitNum() {
+    return hitNum;
+}
+
+void Cache::incrTotalRq() {
+    totalRq++;
+}
+
+int Cache::getTotalRq() {
+    return totalRq;
+}
+
+void Cache::incrPrivateHits() {
+    privateHits++;
+}
+
+int Cache::getPrivateHits() {
+    return privateHits;
+}
+
+void Cache::incrSharedHits() {
+    sharedHits++;
+}
+
+int Cache::getSharedHits() {
+    return sharedHits;
+}
+
+void Cache::setLastUsed(const int & setNum, const int & blockNum) {
+    lastUsed[setNum] = blockNum;
+}
+
 void Cache::allocEntry(const int & addr) {
     // Only allocate entry. State is changed to "V" - for valid.
     // This "V" state is just a placeholder.
@@ -69,30 +105,31 @@ int Cache::hasEntry(const int & addr) const {
     return 0;
 }
 
-void Cache::updateState(const int & addr, string newState) {
+int Cache::updateState(const int & addr, string newState) {
     int setNum = (addr / blockSize) % setCount;
     int posInBlock = addr % blockSize;
     auto set = entries[setNum];
     for (auto block : set) {
         if (block.second[posInBlock] == addr) {
             block.first = newState;
-            break;
+            return 1;
         }
     }
+
+    // Does not find block. Something's wrong
+    return 0;
 }
 
-void Cache::setBusUser(BusUser* busUser) {
-    this->busUser = busUser;
+int Cache::prRd(const int & addr) {
+    // Placeholder
+    return -1;
 }
 
-int Cache::prRd(const int & addr) const {
-    return busUser->busRd(*busUser, addr);
+int Cache::prWr(const int & addr) {
+    // Placeholder
+    return -1;
 }
 
-int Cache::prWr(const int & addr) const {
-    return busUser->busRdX(*busUser, addr);
-}
-
-int Cache::flush(const int & addr) const {
-    return busUser->flush(addr);
+int Cache::flush(const int & addr) {
+    return updateState(addr, "I");
 }

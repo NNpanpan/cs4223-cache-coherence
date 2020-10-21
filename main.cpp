@@ -43,10 +43,6 @@ Bus createBus(int num) {
     return Bus(num);
 }
 
-vector<BusUser> createBusUsers(int num) {
-    return vector<BusUser>(4, BusUser());
-}
-
 vector<Cache> createCaches(int num, int cacheSize, int assoc, int blockSize) {
     return vector<Cache>(4, Cache(assoc, blockSize, cacheSize));
 }
@@ -67,16 +63,4 @@ int main(int argc, char **argv) {
     int assoc = strtol(argv[4], NULL, 0);
     int blockSize = strtol(argv[5], NULL, 0);
 
-    vector<vector<CoreCmd>> coreCmd = readBenchmark(benchmark);
-    vector<BusUser> busUsers = createBusUsers(4);
-    vector<Cache> caches = createCaches(4, cacheSize, assoc, blockSize);
-    Bus bus = createBus(4);
-    vector<Core> cores;
-
-    for (int i = 0; i < 4; i++) {
-        // set BusUsers to Cache
-        caches[i].setBusUser(&busUsers[i]);
-        bus.addBusUser(&busUsers[i], i);
-        cores.push_back(createCore(&caches[i]));
-    }
 }

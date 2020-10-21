@@ -16,8 +16,8 @@ Class Cache:
     - Is a LRU set-assoc cache.
 */
 
-class Cache {
-public:
+class Cache : public BusUser {
+private:
     int hitNum;
     int totalRq;
     int privateHits;
@@ -29,18 +29,30 @@ public:
     int setCount;
     vector<vector<pair<string, vector<int>>>> entries; // cache entries
     vector<int> lastUsed; // last used block for each set
-    BusUser* busUser;
 
+public:
     Cache(const int & assoc, const int & blockSize, const int & cacheSize);
+
+    void incrHit();
+    int getHitNum();
+    void incrTotalRq();
+    int getTotalRq();
+    void incrPrivateHits();
+    int getPrivateHits();
+    void incrSharedHits();
+    int getSharedHits();
+
+    void setLastUsed(const int & setNum, const int & blockNum);
+
     
     void allocEntry(const int & addr);
     int hasEntry(const int & addr) const;
     
-    void updateState(const int & addr, string newState);
-    void setBusUser(BusUser* busUser);
-    int prRd(const int & addr) const; // calls busRd on busUser
-    int prWr(const int & addr) const; // calls busRdX or busUpdate on busUser
-    int flush(const int & addr) const; // calls blush on busUser
+    int updateState(const int & addr, string newState);
+
+    int prRd(const int & addr); 
+    int prWr(const int & addr);
+    int flush(const int & addr);
 };
 
 #endif
