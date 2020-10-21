@@ -6,3 +6,5 @@ LINKERFLAG = -lm
 main: main.cpp
 	${CC} -o coherence main.cpp ${CFLAGS}
 
+clean:
+	rm -r coherence
