@@ -10,6 +10,8 @@ Class Core:
 
 class Core {
 private:
+    int ID;
+
     int execCycles;
     int compCycles;
     int idleCycles;
@@ -21,7 +23,14 @@ private:
     Cache* cache;
 
 public:
-    Core(Cache* cache_ptr);
+    Core(Cache* cache_ptr, const int & id);
+
+    int getID() const;
+
+    void setExecCycles(const int & cycles);
+    void setCompCycles(const int & cycles);
+    void setIdleCycles(const int & cycles);
+    void setLSInstCount(const int & cnt);
 
     void incrExecCycles(const int & cycles);
     int getExecCycles();

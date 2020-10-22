@@ -12,6 +12,18 @@ void Bus::addBusUser(BusUser* busUser, const int & pos) {
     busUsers[pos] = busUser;
 }
 
+void Bus::setTrafficData(const int & data) {
+    trafficData = data;
+}
+
+void Bus::setInvalidateCount(const int & cnt) {
+    invalidateCount = cnt;
+}
+
+void Bus::setUpdateCount(const int & cnt) {
+    updateCount = cnt;
+}
+
 void Bus::incrTrafficData(const int & amount) {
     trafficData += amount;
 }

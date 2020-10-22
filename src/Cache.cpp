@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Cache::Cache(const int & assoc, const int & blockSize, const int & cacheSize) {
+Cache::Cache(const int & assoc, const int & blockSize, const int & cacheSize, const int & ID) {
     this->associativity = assoc;
     this->blockSize = blockSize;
     this->cacheSize = cacheSize;
@@ -24,6 +24,10 @@ Cache::Cache(const int & assoc, const int & blockSize, const int & cacheSize) {
         }
         this->entries.push_back(set);
     }
+}
+
+int Cache::getID() const {
+    return ID;
 }
 
 void Cache::incrHit() {
