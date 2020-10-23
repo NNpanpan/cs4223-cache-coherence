@@ -7,8 +7,15 @@
 
 no of compute cycles not include idle time
 
-invalidate take 0 time 
+invalidate takes 1 cache access = 1 cycle
 
 write -> dirty
 
-use Iilinois MESI 
+use Illinois MESI 
+
+201022:
+
+cache states: busy - someone is accessing, idle_wait - waiting for busOp
+
+tie-break for busOp = core/cache ID -> core/cache has ID
+

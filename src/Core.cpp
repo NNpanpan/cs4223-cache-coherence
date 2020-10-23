@@ -1,4 +1,3 @@
-#include <fstream>
 #include <string>
 
 #include "Cache.h"
@@ -6,8 +5,29 @@
 
 using namespace std;
 
-Core::Core(Cache* cache_ptr) {
+Core::Core(Cache* cache_ptr, const int & id) {
     cache = cache_ptr;
+    ID = id;
+}
+
+int Core::getID() const {
+    return ID;
+}
+
+void Core::setExecCycles(const int & cycles) {
+    execCycles = cycles;
+}
+
+void Core::setCompCycles(const int & cycles) {
+    compCycles = cycles;
+}
+
+void Core::setIdleCycles(const int & cycles) {
+    idleCycles = cycles;
+}
+
+void Core::setLSInstCount(const int & cnt) {
+    loadStoreInstCount = cnt;
 }
 
 void Core::incrExecCycles(const int & cycles) {

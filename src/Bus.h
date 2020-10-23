@@ -24,6 +24,10 @@ public:
 
     void addBusUser(BusUser* busUser, const int & pos);
 
+    void setTrafficData(const int & data);
+    void setInvalidateCount(const int & cnt);
+    void setUpdateCount(const int & cnt);
+
     void incrTrafficData(const int & amount);
     int getTrafficData();
     void incrInvalidateCount();

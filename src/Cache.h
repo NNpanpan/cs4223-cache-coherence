@@ -18,6 +18,8 @@ Class Cache:
 
 class Cache : public BusUser {
 private:
+    int ID;
+
     int hitNum;
     int totalRq;
     int privateHits;
@@ -31,7 +33,9 @@ private:
     vector<int> lastUsed; // last used block for each set
 
 public:
-    Cache(const int & assoc, const int & blockSize, const int & cacheSize);
+    Cache(const int & assoc, const int & blockSize, const int & cacheSize, const int & ID);
+
+    int getID() const;
 
     void incrHit();
     int getHitNum();
@@ -53,7 +57,7 @@ public:
 
     virtual int prRd(const int & addr); 
     virtual int prWr(const int & addr);
-    int flush(const int & addr);
+    int flush(const int & addr) override;
 };
 
 #endif
