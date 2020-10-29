@@ -1,148 +1,173 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <cassert>
 
-#include "Bus.h"
-#include "BusUser.h"
 #include "Cache.h"
 
 using namespace std;
 
-Cache::Cache(const int & assoc, const int & blockSize, const int & cacheSize, const int & ID) {
+
+/*******************************
+ * Cache entry implementation
+ *******************************/
+
+
+CacheEntry::CacheEntry(string state,
+    int lastUsed, int blockNumber) {
+    this->state = state;
+    this->lastUsed = lastUsed;
+    this->blockNumber = blockNumber;
+}
+string CacheEntry::getState() {
+    return state;
+}
+int CacheEntry::getLastUsed() {
+    return lastUsed;
+}
+int CacheEntry::getBlockNumber() {
+    return blockNumber;
+}
+
+bool CacheEntry::isInvalid() {
+    return getState() == "I";
+}
+
+bool CacheEntry::isPrivate() {
+    return getState() == "M"; /// modified
+}
+
+void CacheEntry::setLastUsed(int lastUsed) {
+    this->lastUsed = lastUsed;
+}
+void CacheEntry::setState(string state) {
+    this->state = state;
+}
+
+
+/**************************************
+ * Cache implementation
+ **************************************/
+Cache::Cache(int assoc, int blockSize, int cacheSize, int ID) : Device() {
     this->associativity = assoc;
     this->blockSize = blockSize;
     this->cacheSize = cacheSize;
-    this->entries = vector<vector<pair<string, vector<int>>>>();
 
-    int setCount = cacheSize / (blockSize * assoc);
-    this->setCount = setCount;
-    for (int i = 0; i < setCount; i++) {
-        auto set = vector<pair<string, vector<int>>>();
-        for (int j = 0; j < assoc; j++) {
-            auto block = vector<int>(blockSize/4);
-            set.push_back(pair<string, vector<int>>("I", block));
-        }
-        this->entries.push_back(set);
-    }
+    setCount = cacheSize / (blockSize * assoc);
+    this->entries = vector<vector<CacheEntry>>(setCount, vector<CacheEntry>(associativity, CacheEntry()));
 }
 
-int Cache::getID() const {
+
+/// private func
+
+int Cache::getCacheIndex(int blockNumber) {
+    return blockNumber % setCount;
+}
+
+int Cache::getBlockNumber(int addr) {
+    return addr / blockSize;
+}
+
+int Cache::getAssocNumber(int addr) {
+    int blockNumber = getBlockNumber(addr);
+    int cacheIndex = getCacheIndex(blockNumber);
+    vector<CacheEntry> &currentSet = entries[cacheIndex];
+    for(int num = 0; num < currentSet.size(); num++) {
+        CacheEntry entry = currentSet[num];
+        if (entry.isInvalid()) {
+            continue;
+        }
+        if (entry.getBlockNumber() == blockNumber) {
+            ///same block number
+            return num;
+        }
+    }
+    return -1;
+}
+
+int Cache::getEvictedAssocNumber(int cacheIndex) {
+    vector<CacheEntry> &currentSet = entries[cacheIndex];
+    /// if there is an invalid entry, choose it
+    for(int num = 0; num < currentSet.size(); num++) {
+        CacheEntry entry = currentSet[num];
+        if (entry.isInvalid()) {
+            return num;
+        }
+    }
+
+    ///otherwise, LRU policy
+    int result = 0;
+    for(int num = 0; num < currentSet.size(); num++) {
+        CacheEntry entry = currentSet[num];
+        if (entry.getLastUsed() < currentSet[result].getLastUsed())
+            result = num;
+    }
+    return result;
+}
+
+CacheEntry& Cache::getEntry(int addr) {
+    assert(hasEntry(addr));
+    int blockNumber = getBlockNumber(addr);
+    int cacheIndex = getCacheIndex(blockNumber);
+    int assocNumber = getAssocNumber(addr);
+    return entries[cacheIndex][assocNumber];
+}
+
+/// public func
+int Cache::getID() {
     return ID;
 }
 
-void Cache::incrHit() {
-    hitNum++;
+void Cache::setBlockLastUsed(int addr, int lastUsed) {
+    getEntry(addr).setLastUsed(lastUsed);
 }
 
-int Cache::getHitNum() {
-    return hitNum;
+void Cache::setBlockState(int addr, string state) {
+    getEntry(addr).setState(state);
 }
 
-void Cache::incrTotalRq() {
-    totalRq++;
+string Cache::getBlockState(int addr) {
+    return getEntry(addr).getState();
 }
 
-int Cache::getTotalRq() {
-    return totalRq;
+CacheEntry Cache::evictEntry(int addr) {
+    assert(!hasEntry(addr));
+    int blockNumber = getBlockNumber(addr);
+    int cacheIndex = getCacheIndex(blockNumber);
+    int evictedAssocNumber = getEvictedAssocNumber(cacheIndex);
+    CacheEntry result = entries[cacheIndex][evictedAssocNumber];
+    entries[cacheIndex][evictedAssocNumber] = CacheEntry();
+    return result;
+}
+void Cache::allocEntry(int addr, string state, int lastUsed) {
+    assert(!hasEntry(addr));
+    int blockNumber = getBlockNumber(addr);
+    int cacheIndex = getCacheIndex(blockNumber);
+    int evictedAssocNumber = getEvictedAssocNumber(cacheIndex);
+
+    assert(entries[cacheIndex][evictedAssocNumber].isInvalid());
+
+    entries[cacheIndex][evictedAssocNumber] = CacheEntry(state, lastUsed, blockNumber);
 }
 
-void Cache::incrPrivateHits() {
-    privateHits++;
+int Cache::hasEntry(int addr) {
+    return getAssocNumber(addr) != -1;
 }
 
-int Cache::getPrivateHits() {
-    return privateHits;
+bool Cache::isAddrPrivate(int addr) {
+    assert(hasEntry(addr));
+    return getEntry(addr).isPrivate();
 }
 
-void Cache::incrSharedHits() {
-    sharedHits++;
+bool Cache::isAddrInvalid(int addr) {
+    if (!hasEntry(addr)) return true;
+    return getEntry(addr).isInvalid();
 }
 
-int Cache::getSharedHits() {
-    return sharedHits;
+int Cache::getHeadAddr(CacheEntry entry) {
+    int blockNumber = entry.getBlockNumber();
+    return blockNumber * blockSize;
 }
 
-int Cache::getBlockWordCount() {
-    return blockSize/4;
-}
 
-void Cache::setLastUsed(const int & addr) {
-    int setNum = (addr / blockSize) % setCount;
-    int posInBlock = addr % blockSize;
-    auto set = entries[setNum];
-}
 
-void Cache::allocEntry(const int & addr) {
-    // Only allocate entry. State is changed to "V" - for valid.
-    // This "V" state is just a placeholder.
-    // Actual state depends on the protocol.
-    // The coherence protocol will decide which state to set.
-    int setNum = (addr / blockSize) % setCount;
-    int posInBlock = addr % blockSize;
-    auto set = entries[setNum];
-    int avail = 0;
-    for (auto block : set) {
-        if (block.first == "I") {
-            block.second[posInBlock] = addr;
-            for (int j = 0; j < blockSize/4; j++) {
-                block.second[j] = addr + (j - posInBlock);
-            }
-            avail = 1;
-            block.first = "V";
-            break;
-        }
-    }
-
-    if (!avail) {
-        auto lruBlock = set[lastUsed[setNum]];
-        for (int j = 0; j < blockSize/4; j++) {
-            lruBlock.second[j] = addr + (j - posInBlock);
-        }
-        lruBlock.first = "V";
-    }
-}
-
-int Cache::hasEntry(const int & addr) const {
-    // Returns 1 if addr is cached, 0 otherwise
-    int setNum = (addr / blockSize) % setCount;
-    int posInBlock = addr % blockSize;
-    auto set = entries[setNum];
-    for (auto block : set) {
-        if (block.first != "I" && block.second[posInBlock] == addr)
-            return 1;
-    }
-    
-    return 0;
-}
-
-int Cache::updateState(const int & addr, string newState) {
-    int setNum = (addr / blockSize) % setCount;
-    int posInBlock = addr % blockSize;
-    auto set = entries[setNum];
-    for (auto block : set) {
-        if (block.second[posInBlock] == addr) {
-            block.first = newState;
-            return 1;
-        }
-    }
-
-    // Does not find block. Something's wrong
-    return 0;
-}
-
-int Cache::prRd(const int & addr) {
-    // Placeholder
-    return -1;
-}
-
-int Cache::prWr(const int & addr) {
-    // Placeholder
-    return -1;
-}
-
-int Cache::flush(const int & addr) {
-    // if block exists, vacate successfully and access memory
-    // return 100 - memory access cost
-    // otherwise, return 0
-    return updateState(addr, "I") ? 100 : 0;
-}

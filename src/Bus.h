@@ -2,40 +2,34 @@
 #define BUS_H
 
 #include <vector>
-#include "BusUser.h"
+
+#include "Device.h"
 
 using namespace std;
 
 /*
 Class Bus:
-    - The common data bus.
+    - The common data bus
 */
 
-class Bus {
+class Bus : public Device {
 private:
-    vector<BusUser*> busUsers; // all BusUsers
-    int userCount;
-    int trafficData;
-    int invalidateCount;
-    int updateCount;
+    int blockSize;
+    int trafficData; /// stat 6
+    int invalidateCount; /// stat 7
+    int updateCount; /// stat 7
 
 public:
-    Bus(const int & userCount);
+    Bus(int blockSize);
 
-    void addBusUser(BusUser* busUser, const int & pos);
-
-    void setTrafficData(const int & data);
-    void setInvalidateCount(const int & cnt);
-    void setUpdateCount(const int & cnt);
-
-    void incrTrafficData(const int & amount);
     int getTrafficData();
-    void incrInvalidateCount();
-    int getInvalidateCount();
-    void incrUpdateCount();
-    int getUpdateCount();
+    void incTrafficBlock(int numBlock = 1);
+    void incTrafficWord(int numWord = 1);
 
-    int findEntry(const int & addr);
+    void incInvalidateCount();
+    int getInvalidateCount();
+    void incUpdateCount();
+    int getUpdateCount();
 };
 
 #endif

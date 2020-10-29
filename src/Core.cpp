@@ -1,108 +1,98 @@
 #include <string>
+#include <cassert>
 
-#include "Cache.h"
 #include "Core.h"
 
 using namespace std;
 
-Core::Core(Cache* cache_ptr, const int & id) {
-    cache = cache_ptr;
-    ID = id;
+Core::Core(vector<pair<int, int>> traces, int ID) : Device() {
+    this->ID = ID;
+    for(auto trace : traces) {
+        traceQ.push(trace);
+    }
 }
 
-int Core::getID() const {
+bool Core::isFinish() {
+    return isFree() && traceQ.empty();
+}
+
+pair<int, int> Core::peekTrace() {
+    assert(!traceQ.empty());
+    return traceQ.front();
+}
+
+void Core::popTrace() {
+    assert(!traceQ.empty());
+    traceQ.pop();
+}
+
+int Core::getID() {
     return ID;
 }
 
-void Core::setExecCycles(const int & cycles) {
-    execCycles = cycles;
+void Core::incLoadCount() {
+    loadCount++;
 }
 
-void Core::setCompCycles(const int & cycles) {
-    compCycles = cycles;
+int Core::getLoadCount() {
+    return loadCount;
 }
 
-void Core::setIdleCycles(const int & cycles) {
-    idleCycles = cycles;
+void Core::incStoreCount() {
+    storeCount++;
 }
 
-void Core::setLSInstCount(const int & cnt) {
-    loadStoreInstCount = cnt;
+int Core::getStoreCount() {
+    return storeCount;
 }
 
-void Core::incrExecCycles(const int & cycles) {
-    execCycles += cycles;
+void Core::incCacheMissCount() {
+    cacheMissCount++;
 }
 
-int Core::getExecCycles() {
-    return execCycles;
+int Core::getCacheMissCount() {
+    return cacheMissCount;
 }
 
-void Core::incrCompCycles(const int & cycles) {
-    compCycles += cycles;
+void Core::incPrivateAccessCount() {
+    privateAccessCount++;
 }
 
-int Core::getCompCycles() {
-    return compCycles;
-}
-
-void Core::incrIdleCycles(const int & cycles) {
-    idleCycles += cycles;
+int Core::getPrivateAccessCount() {
+    return privateAccessCount;
 }
 
 int Core::getIdleCycles() {
     return idleCycles;
 }
 
-void Core::incrLSInstCount() {
-    loadStoreInstCount++;
+void Core::incIdleCycles(int cycles) {
+    idleCycles += cycles;
 }
 
-int Core::getLSInstCount() {
-    return loadStoreInstCount;
+int Core::getExecCycles() {
+    return execCycles;
 }
 
-int Core::execCmd(const int & cmdType, const int & info) {
-    switch (cmdType) {
-        case 0:
-            int cost = prRd(info);
-            incrIdleCycles(cost);
-            incrExecCycles(cost);
-            setNextFreeCycle(execCycles);
-            return cost;
-        case 1:
-            int cost = prWr(info);
-            incrIdleCycles(cost);
-            incrExecCycles(cost);
-            setNextFreeCycle(execCycles);
-            return cost;
-        case 2:
-            int cost = computeOthers(info);
-            incrCompCycles(cost);
-            incrExecCycles(cost);
-            setNextFreeCycle(execCycles);
-            return cost;
-        default:
-            return 0;
+void Core::incExecCycles(int cycles) {
+    execCycles += cycles;
+}
+
+int Core::getCompCycles() {
+    return compCycles;
+}
+
+void Core::incCompCycles(int cycles) {
+    compCycles += cycles;
+}
+
+void Core::progress(int cycles) {
+    if (isFinish()) {
+        return; ///freeze finished core
     }
-}
 
-int Core::computeOthers(const int & cycles) {
-    isFree = 0;
-    
-    return cycles;
-}
-
-int Core::prRd(const int & addr) {
-    isFree = 0;
-    return cache->prRd(addr);
-}
-
-int Core::prWr(const int & addr) {
-    isFree = 0;
-    return cache->prWr(addr);
-}
-
-void Core::finaliseStats() {
-    idleCycles = execCycles - compCycles;
+    assert(cycles > 0);
+    incExecCycles(cycles); /// stat 1
+    if (isBusyWait()) incIdleCycles(cycles); /// stat 4
+    if (isBusy()) incCompCycles(cycles); /// stat 2
 }

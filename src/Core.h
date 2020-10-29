@@ -1,58 +1,62 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "Cache.h"
+#include <queue>
+#include <vector>
+
+#include "Device.h"
+
+using namespace std;
 
 /*
 Class Core:
     - Represents the processor
 */
 
-class Core {
+class Core : public Device {
 private:
+    queue<pair<int, int>> traceQ;
     int ID;
 
-    int execCycles;
-    int compCycles;
-    int idleCycles;
-    int loadStoreInstCount;
+    /// stat related
+    int execCycles; /// stat 1
+    int compCycles; /// stat 2
+    int idleCycles; /// stat 4
 
-    // Instruc Q is external
-    int isFree;
-    int nextFreeCycle;
-    Cache* cache;
+    int loadCount;  /// stat 3
+    int storeCount; /// stat 3
+    int cacheMissCount; ///miss rate = cacheMissCount / (loadCount + storeCount) stat 5
+    int privateAccessCount; /// sharedAccess = loadCount - privateAccessCount stat 8
 
 public:
-    Core(Cache* cache_ptr, const int & id);
+    Core(vector<pair<int, int>> traces, int ID);
+    bool isFinish();
 
-    int getID() const;
+    pair<int, int> peekTrace(); /// return the first trace
+    void popTrace();
 
-    void setExecCycles(const int & cycles);
-    void setCompCycles(const int & cycles);
-    void setIdleCycles(const int & cycles);
-    void setLSInstCount(const int & cnt);
+    int getID();
 
-    void incrExecCycles(const int & cycles);
+    void incLoadCount();
+    int getLoadCount();
+
+    void incStoreCount();
+    int getStoreCount();
+
+    void incCacheMissCount();
+    int getCacheMissCount();
+
+    void incPrivateAccessCount();
+    int getPrivateAccessCount();
+
     int getExecCycles();
-    void incrCompCycles(const int & cycles);
-    int getCompCycles();
-    void incrIdleCycles(const int & cycles);
+    void incExecCycles(int cycles);
     int getIdleCycles();
-    void incrLSInstCount();
-    int getLSInstCount();
+    void incIdleCycles(int cycles);
+    int getCompCycles();
+    void incCompCycles(int cycles);
 
-    void setIsFree(const int & val);
-    int getIsFree();
-    void setNextFreeCycle(const int & cycle);
-
-    
-    int execCmd(const int & cmdType, const int & info);
-
-    int computeOthers(const int & cycles);
-    int prRd(const int & addr);
-    int prWr(const int & addr);
-
-    void finaliseStats();
+    void progress(int cycles);
 };
 
 #endif
