@@ -160,7 +160,7 @@ int Runner::findNextEvent() { /// TBD: recheck correctness
 }
 void Runner::simulate() {
     while (!isAllFinish()) {
-        printDebug();
+        // printDebug();
         /// release priority
         checkReleaseBus();
         checkReleaseCache();

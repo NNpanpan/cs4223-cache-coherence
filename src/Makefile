@@ -9,7 +9,9 @@ BINS := $(patsubst %.cpp, %.o, ${SRCS})
 ${BINS} : %.o : %.cpp %.h
 	${CC} -c $^ ${CFLAGS}
 
+all: $(BINS)
+
 clean: 
 	@echo "Cleaning object file"
-	rm -rvf *.o 
+	rm -rvf *.o *.h.gch 
 

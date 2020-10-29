@@ -12,23 +12,23 @@ CacheReq::CacheReq(int cacheID, int addr, int initTime, string reqType) {
     this->reqType = reqType;
 }
 
-int CacheReq::getCacheID() {
+int CacheReq::getCacheID() const {
     return cacheID;
 }
 
-int CacheReq::getInitTime() {
+int CacheReq::getInitTime() const {
     return initTime;
 }
 
-int CacheReq::getAddr() {
+int CacheReq::getAddr() const {
     return addr;
 }
 
-string CacheReq::getReqType() {
+string CacheReq::getReqType() const {
     return reqType;
 }
 
-bool CacheReq::operator < (CacheReq &oth) {
+bool CacheReq::operator < (const CacheReq &oth) const {
     if (initTime != oth.initTime)
         return initTime < oth.initTime;
     if (cacheID != oth.cacheID) {
