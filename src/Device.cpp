@@ -50,3 +50,7 @@ void Device::refresh(int curTime) {
         setFree();
     }
 }
+
+int Device::getState() {
+    return state;
+}

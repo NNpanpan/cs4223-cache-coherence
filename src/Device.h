@@ -29,6 +29,8 @@ public:
 
     int getNextFree();
     void refresh(int curTime);
+
+    int getState();
 };
 
 #endif // DEVICE_H

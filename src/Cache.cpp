@@ -52,6 +52,7 @@ Cache::Cache(int assoc, int blockSize, int cacheSize, int ID) : Device() {
     this->associativity = assoc;
     this->blockSize = blockSize;
     this->cacheSize = cacheSize;
+    this->ID = ID;
 
     setCount = cacheSize / (blockSize * assoc);
     this->entries = vector<vector<CacheEntry>>(setCount, vector<CacheEntry>(associativity, CacheEntry()));

@@ -91,7 +91,7 @@ void Core::progress(int cycles) {
         return; ///freeze finished core
     }
 
-    assert(cycles > 0);
+    // assert(cycles > 0);
     incExecCycles(cycles); /// stat 1
     if (isBusyWait()) incIdleCycles(cycles); /// stat 4
     if (isBusy()) incCompCycles(cycles); /// stat 2

@@ -11,4 +11,4 @@ main: main.cpp
 	${CC} -o coherence main.cpp ${BINS} ${CFLAGS}
 
 clean:
-	rm -r coherence
+	rm -rvf coherence

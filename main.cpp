@@ -61,4 +61,6 @@ int main(int argc, char **argv) {
     vector<vector<CoreOps>> ops = readBenchmark(benchmark);
 
     simulate(protocol, cacheSize, assoc, blockSize, ops);
+
+    return 0;
 }

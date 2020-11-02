@@ -1,4 +1,7 @@
+#include <bits/stdc++.h>
 #include "Runner.h"
+
+using namespace std;
 
 Runner::Runner(int cacheSize, int assoc, int blockSize,
         vector<vector<pair<int, int>>> coreTraces) : bus(blockSize) {
@@ -62,6 +65,7 @@ bool Runner::checkReleaseCore() { /// if any core got release
     bool exist = false;
     for(int coreID = 0; coreID < cores.size(); coreID++) {
         Core& core = cores[coreID];
+
         if (core.isFinish()) continue;
 
         core.refresh(curTime);
@@ -93,7 +97,7 @@ bool Runner::checkCoreReq() {
     bool exist = false;
     for(int coreID = 0; coreID < cores.size(); coreID++) { /// ensure priority
         Core& core = cores[coreID];
-        if (!core.isFree()) continue;
+        if (core.isFinish() || !core.isFree()) continue;
 
         pair<int, int> trace = core.peekTrace();
         int traceType = trace.first;
@@ -153,24 +157,30 @@ int Runner::findNextEvent() { /// TBD: recheck correctness
         event = min(event, core.getNextFree());
     for(auto &cache: caches) if (!cache.isFree())
         event = min(event, cache.getNextFree());
-
-    if (!bus.isFree())
+    if (!bus.isFree()) {
         event = min(event, bus.getNextFree());
-    return true;
+    }
+    return event;
 }
 void Runner::simulate() {
+    bool firstRound = true;
     while (!isAllFinish()) {
         // printDebug();
-        /// release priority
-        checkReleaseBus();
-        checkReleaseCache();
+        if (!firstRound) {
 
-        /// this will also allow core to retrieve memory if cache is free
-        checkReleaseCore();
+            /// release priority
+            checkReleaseBus();
+            checkReleaseCache();
+
+            /// this will also allow core to retrieve memory if cache is free
+            checkReleaseCore();
+        }
+        firstRound = false;
 
         /// first try to satisfy any request from cache
         bool haveCacheReq = false;
-        for(auto req : pendingReq) {
+        for(auto &req : pendingReq) {
+
             Cache& reqCache = caches[req.getCacheID()];
             /// both bus and cache should be free to exec
             if (!bus.isBusy() && !reqCache.isBusy()) {

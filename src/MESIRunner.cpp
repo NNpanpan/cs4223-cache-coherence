@@ -45,6 +45,7 @@ void MESIRunner::execCacheReq(CacheReq req) {
     int addr = req.getAddr();
     int cacheID = req.getCacheID();
     Cache &cache = caches[cacheID];
+    Core &core = cores[cacheID];
 
     assert(bus.isFree());
     assert(cache.isFree());
@@ -54,7 +55,7 @@ void MESIRunner::execCacheReq(CacheReq req) {
         for(int othCacheID = 0; othCacheID < caches.size(); othCacheID++) {
             if (othCacheID == cacheID) continue;
             Cache& othCache = caches[othCacheID];
-            if (othCache.isAddrPrivate(addr)) {
+            if (othCache.hasEntry(addr) && othCache.isAddrPrivate(addr)) {
                 /// that cache need to execute write
                 addCacheReq(CacheReq(othCacheID, addr, curTime, "wr"));
                 /// not fulfill yet, push request back to pending, set busy wait
