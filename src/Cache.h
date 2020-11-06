@@ -5,8 +5,6 @@
 #include <utility>
 #include <vector>
 
-#include "Device.h"
-
 using namespace std;
 
 class CacheEntry {
@@ -14,8 +12,10 @@ private:
     string state;
     int lastUsed;
     int blockNumber;
+    int validFrom;
 public:
-    CacheEntry(string state = "I", int lastUsed = -1, int blockNumber = -1);
+    CacheEntry(string state = "I",
+        int lastUsed = -1, int blockNumber = -1, int validFrom = -1);
     string getState();
     int getLastUsed();
     int getBlockNumber();
@@ -25,6 +25,9 @@ public:
 
     void setLastUsed(int lastUsed);
     void setState(string state);
+    void setValidFrom(int validFrom);
+
+    int getValidFrom();
 };
 
 /*
@@ -33,7 +36,7 @@ Class Cache:
     - Is a LRU set-assoc cache.
 */
 
-class Cache : public Device {
+class Cache {
 private:
     int ID;
     int associativity;
@@ -46,7 +49,7 @@ private:
     vector<vector<CacheEntry>> entries; // cache entries, state + last used
 
     int getCacheIndex(int blockNumber); /// 0 to setCount - 1
-    int getBlockNumber(int addr);
+
 
     ///where is the block that contain this addr in the set, -1 if not contain
     int getAssocNumber(int addr);
@@ -54,18 +57,22 @@ private:
     int getEvictedAssocNumber(int cacheIndex);
     CacheEntry& getEntry(int addr);
 public:
+
+    int getBlockNumber(int addr);
+
     Cache(int assoc, int blockSize, int cacheSize, int ID);
     int getID();
 
     /// the block contain this address must be inside the cache
     void setBlockLastUsed(int addr, int lastUsed);
+    void setBlockValidFrom(int addr, int validFrom);
     void setBlockState(int addr, string newState);
     string getBlockState(int addr);
 
     /// evict and return the evicted entry belong to same set as addr (can be invalid)
     CacheEntry evictEntry(int addr);
     /// alloc entry, must have call evictEntry before
-    void allocEntry(int addr, string state, int lastUsed);
+    void allocEntry(int addr, string state, int lastUsed, int validFrom);
     /// only consider to has IFF not invalid
     int hasEntry(int addr);
 
@@ -73,6 +80,9 @@ public:
     bool isAddrPrivate(int addr);
     /// return true if (not in cache or I state), otherwise false
     bool isAddrInvalid(int addr);
+
+    /// return the cycle when the addr is usable, must currently in cache
+    int getAddrUsableTime(int addr);
 
     /// return head address of the entry
     int getHeadAddr(CacheEntry entry);

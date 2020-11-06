@@ -3,8 +3,12 @@
 
 using namespace std;
 
-Bus::Bus(int blockSize) : Device() {
+Bus::Bus(int blockSize) {
     this->blockSize = blockSize;
+
+    trafficData = 0;
+    invalidateCount = 0;
+    updateCount = 0;
 }
 
 

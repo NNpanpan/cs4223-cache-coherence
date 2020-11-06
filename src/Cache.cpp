@@ -14,10 +14,11 @@ using namespace std;
 
 
 CacheEntry::CacheEntry(string state,
-    int lastUsed, int blockNumber) {
+    int lastUsed, int blockNumber, int validFrom) {
     this->state = state;
     this->lastUsed = lastUsed;
     this->blockNumber = blockNumber;
+    this->validFrom = validFrom;
 }
 string CacheEntry::getState() {
     return state;
@@ -44,17 +45,26 @@ void CacheEntry::setState(string state) {
     this->state = state;
 }
 
+void CacheEntry::setValidFrom(int validFrom) {
+    this->validFrom = validFrom;
+}
+
+int CacheEntry::getValidFrom() {
+    return validFrom;
+}
+
 
 /**************************************
  * Cache implementation
  **************************************/
-Cache::Cache(int assoc, int blockSize, int cacheSize, int ID) : Device() {
+Cache::Cache(int assoc, int blockSize, int cacheSize, int ID) {
     this->associativity = assoc;
     this->blockSize = blockSize;
     this->cacheSize = cacheSize;
 
     setCount = cacheSize / (blockSize * assoc);
     this->entries = vector<vector<CacheEntry>>(setCount, vector<CacheEntry>(associativity, CacheEntry()));
+    this->ID = ID;
 }
 
 
@@ -122,6 +132,10 @@ void Cache::setBlockLastUsed(int addr, int lastUsed) {
     getEntry(addr).setLastUsed(lastUsed);
 }
 
+void Cache::setBlockValidFrom(int addr, int validFrom) {
+    getEntry(addr).setValidFrom(validFrom);
+}
+
 void Cache::setBlockState(int addr, string state) {
     getEntry(addr).setState(state);
 }
@@ -139,7 +153,7 @@ CacheEntry Cache::evictEntry(int addr) {
     entries[cacheIndex][evictedAssocNumber] = CacheEntry();
     return result;
 }
-void Cache::allocEntry(int addr, string state, int lastUsed) {
+void Cache::allocEntry(int addr, string state, int lastUsed, int validFrom) {
     assert(!hasEntry(addr));
     int blockNumber = getBlockNumber(addr);
     int cacheIndex = getCacheIndex(blockNumber);
@@ -147,7 +161,7 @@ void Cache::allocEntry(int addr, string state, int lastUsed) {
 
     assert(entries[cacheIndex][evictedAssocNumber].isInvalid());
 
-    entries[cacheIndex][evictedAssocNumber] = CacheEntry(state, lastUsed, blockNumber);
+    entries[cacheIndex][evictedAssocNumber] = CacheEntry(state, lastUsed, blockNumber, validFrom);
 }
 
 int Cache::hasEntry(int addr) {
@@ -162,6 +176,11 @@ bool Cache::isAddrPrivate(int addr) {
 bool Cache::isAddrInvalid(int addr) {
     if (!hasEntry(addr)) return true;
     return getEntry(addr).isInvalid();
+}
+
+int Cache::getAddrUsableTime(int addr) {
+    assert(hasEntry(addr));
+    return getEntry(addr).getValidFrom();
 }
 
 int Cache::getHeadAddr(CacheEntry entry) {

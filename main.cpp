@@ -42,8 +42,9 @@ void simulate(string protocol,
     vector<vector<CoreOps>> ops) {
 
     Runner* runner;
-    if (protocol == "mesi")
+    if (protocol == "mesi") {
         runner = new MESIRunner(cacheSize, assoc, blockSize, ops);
+    }
     runner->simulate();
     delete(runner);
 }

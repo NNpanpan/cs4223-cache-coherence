@@ -14,7 +14,7 @@ Class Core:
 */
 
 class Core : public Device {
-private:
+public: /// TBD : rechange to private, debugging
     queue<pair<int, int>> traceQ;
     int ID;
 

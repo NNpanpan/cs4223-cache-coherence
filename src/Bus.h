@@ -2,8 +2,7 @@
 #define BUS_H
 
 #include <vector>
-
-#include "Device.h"
+#include <set>
 
 using namespace std;
 
@@ -12,12 +11,13 @@ Class Bus:
     - The common data bus
 */
 
-class Bus : public Device {
+class Bus {
 private:
     int blockSize;
     int trafficData; /// stat 6
     int invalidateCount; /// stat 7
     int updateCount; /// stat 7
+
 
 public:
     Bus(int blockSize);

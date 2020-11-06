@@ -1,0 +1,64 @@
+Core 0 read miss addr 36 at 0
+Cache 0 have 36 at 100
+Core 0 free at 101
+Core 3 free at 256
+Core 1 write miss addr 54 at 1
+Cache 1 have 54 at 101
+Core 1 free at 102
+Core 2 write miss addr 54 at 2
+Cache 2 have 54 at 202
+Core 2 free at 203
+Core 0 write hit addr 36 at 101
+Core 0 free at 102
+Core 1 read miss addr 54 at 102
+Cache 1 have 54 at 302
+Core 1 free at 303
+Core 2 free at 283
+Core 3 write miss addr 36 at 256
+Cache 3 have 36 at 456
+Core 3 free at 457
+Stat 1: (Exec time)
+Core 0: 102 cycle(s)
+Core 1: 303 cycle(s)
+Core 2: 283 cycle(s)
+Core 3: 457 cycle(s)
+Total: 457 cycle(s)
+------------------------------------
+Stat 2: (Compute time)
+Core 0: 102 cycle(s)
+Core 1: 303 cycle(s)
+Core 2: 283 cycle(s)
+Core 3: 457 cycle(s)
+------------------------------------
+Stat 3: (Load/Store)
+Core 0: 1 load(s), 1 store(s)
+Core 1: 1 load(s), 1 store(s)
+Core 2: 0 load(s), 1 store(s)
+Core 3: 0 load(s), 1 store(s)
+------------------------------------
+Stat 4: (Idle time)
+Core 0: 102 cycle(s)
+Core 1: 303 cycle(s)
+Core 2: 203 cycle(s)
+Core 3: 201 cycle(s)
+------------------------------------
+Stat 5: (Cache miss rate)
+Core 0: 50.00%
+Core 1: 100.00%
+Core 2: 100.00%
+Core 3: 100.00%
+------------------------------------
+Stat 6: (Bus traffic size)
+48 byte(s)
+------------------------------------
+Stat 7: (Invalidation / Update)
+Invalidation: 2 time(s)
+Update: 3 time(s)
+------------------------------------
+Stat 8: (Private access distribution)
+Per core
+Core 0: 1 / 2 = 50.00%
+Core 1: 1 / 2 = 50.00%
+Core 2: 1 / 1 = 100.00%
+Core 3: 1 / 1 = 100.00%
+Total : 4 / 6 = 66.67%

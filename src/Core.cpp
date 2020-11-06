@@ -10,6 +10,15 @@ Core::Core(vector<pair<int, int>> traces, int ID) : Device() {
     for(auto trace : traces) {
         traceQ.push(trace);
     }
+
+    execCycles = 0;
+    compCycles = 0;
+    idleCycles = 0;
+
+    loadCount = 0;  
+    storeCount = 0; 
+    cacheMissCount = 0;
+    privateAccessCount = 0;
 }
 
 bool Core::isFinish() {
@@ -93,6 +102,5 @@ void Core::progress(int cycles) {
 
     assert(cycles > 0);
     incExecCycles(cycles); /// stat 1
-    if (isBusyWait()) incIdleCycles(cycles); /// stat 4
-    if (isBusy()) incCompCycles(cycles); /// stat 2
+
 }
