@@ -12,5 +12,5 @@ ${BINS} : %.o : %.cpp %.h
 
 clean: 
 	@echo "Cleaning object file"
-	rm -rvf *.o 
+	rm -rvf *.o *.h.gch 
 

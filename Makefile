@@ -9,5 +9,10 @@ BINS := $(patsubst %.cpp, %.o, ${SRCS})
 main: main.cpp
 	${CC} -o coherence main.cpp ${BINS} ${CFLAGS}
 
+all: main.cpp
+	@${MAKE} all -C src
+	${CC} -o coherence main.cpp ${BINS} ${CFLAGS}
+
 clean:
-	rm -r coherence
+	rm -rvf coherence
+	rm -rvf src/*.o src/*.h.gch
