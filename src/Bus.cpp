@@ -39,3 +39,7 @@ void Bus::incUpdateCount() {
 int Bus::getUpdateCount() {
     return updateCount;
 }
+
+int Bus::getWordPerBlock() {
+    return blockSize / 4; ///default word size
+}

@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 #include "src/MESIRunner.h"
+#include "src/DragonRunner.h"
 
 using namespace std;
 
@@ -44,6 +45,9 @@ void simulate(string protocol,
     Runner* runner;
     if (protocol == "mesi") {
         runner = new MESIRunner(cacheSize, assoc, blockSize, ops);
+    }
+    if (protocol == "dragon") {
+        runner = new DragonRunner(cacheSize, assoc, blockSize, ops);
     }
     runner->simulate();
     delete(runner);

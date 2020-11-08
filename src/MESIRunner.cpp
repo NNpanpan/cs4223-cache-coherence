@@ -55,12 +55,12 @@ void MESIRunner::invalidateO(int cacheID, int addr, bool needWriteBack) {
 }
 
 void MESIRunner::simulateReadHit(int coreID, int addr) {
-    //cout << "Core " << coreID << " read hit addr " << addr << " at " << curTime << endl; 
+    //cout << "Core " << coreID << " read hit addr " << addr << " at " << curTime << endl;
     Cache& cache = caches[coreID];
     cache.setBlockLastUsed(addr, curTime);
 }
 void MESIRunner::simulateWriteHit(int coreID, int addr) {
-    //cout << "Core " << coreID << " write hit addr " << addr << " at " << curTime << endl; 
+    //cout << "Core " << coreID << " write hit addr " << addr << " at " << curTime << endl;
     int cacheID = coreID;
     Cache& cache = caches[cacheID];
     string blockState = cache.getBlockState(addr);
@@ -77,7 +77,7 @@ void MESIRunner::simulateWriteHit(int coreID, int addr) {
 }
 
 void MESIRunner::simulateReadMiss(int coreID, int addr) {
-    //cout << "Core " << coreID << " read miss addr " << addr << " at " << curTime << endl; 
+    //cout << "Core " << coreID << " read miss addr " << addr << " at " << curTime << endl;
     int cacheID = coreID;
     Cache &cache = caches[cacheID];
 
@@ -104,9 +104,12 @@ void MESIRunner::simulateReadMiss(int coreID, int addr) {
     }
     string addrState = (countHold == 0) ? "E" : "S";
     cacheAllocAddr(cacheID, addr, addrState);
+
+    /// update stat 6 + 7
+    bus.incTrafficBlock();
 }
 void MESIRunner::simulateWriteMiss(int coreID, int addr) {
-    //cout << "Core " << coreID << " write miss addr " << addr << " at " << curTime << endl; 
+    //cout << "Core " << coreID << " write miss addr " << addr << " at " << curTime << endl;
     int cacheID = coreID;
     Cache& cache = caches[cacheID];
     invalidateO(cacheID, addr, true);
@@ -117,44 +120,11 @@ void MESIRunner::simulateWriteMiss(int coreID, int addr) {
     /// mem does not hold a copy
     int blockNum = cache.getBlockNumber(addr);
     invalidBlock[blockNum] = INF;
-}
-void MESIRunner::cacheWriteBackMem(int cacheID, int addr) {
-    Cache& cache = caches[cacheID];
-    int blockNum = cache.getBlockNumber(addr);
-    assert(invalidBlock[blockNum] == INF); /// mem should not hold this address
-    invalidBlock[blockNum] = curTime + 100;
 
     /// update stat 6 + 7
-    bus.incUpdateCount();
     bus.incTrafficBlock();
 }
 
-void MESIRunner::checkMem() {
-    vector<int> unfreezeBlock;
-    for(auto ite : invalidBlock) if (ite.second == curTime) {
-        unfreezeBlock.push_back(ite.first);
-    }
-    for(auto block : unfreezeBlock) {
-        invalidBlock.erase(block);
-    }
-}
-
-void MESIRunner::progressTime(int newTime) {
-    for(auto &core : cores) {
-        core.progress(newTime - curTime);
-    }
-    curTime = newTime;
-    checkMem();
-}
-
-int MESIRunner::getMemBlockAvailableTime(int blockNum) {
-    auto ite = invalidBlock.find(blockNum);
-    if (ite == invalidBlock.end()) {
-        return curTime;
-    }
-    assert(ite->second >= curTime);
-    return ite->second;
-}
 
 MESIRunner::~MESIRunner() {
 }

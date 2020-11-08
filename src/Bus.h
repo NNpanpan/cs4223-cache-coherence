@@ -22,6 +22,8 @@ private:
 public:
     Bus(int blockSize);
 
+    int getWordPerBlock();
+
     int getTrafficData();
     void incTrafficBlock(int numBlock = 1);
     void incTrafficWord(int numWord = 1);
