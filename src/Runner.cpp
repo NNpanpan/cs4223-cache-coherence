@@ -16,6 +16,12 @@ Runner::Runner(int cacheSize, int assoc, int blockSize,
     curTime = 0;
 }
 
+void Runner::setMemBlockAvailableTime(int blockNum, int availTime) {
+    invalidBlock[blockNum] = availTime;
+}
+void Runner::setMemBlockUnavailable(int blockNum) {
+    setMemBlockAvailableTime(blockNum, INF);
+}
 
 /// helper
 
@@ -38,7 +44,7 @@ void Runner::printStat() {
     cout << "Stat 2: (Compute time)\n";
     for(int coreID = 0; coreID < cores.size(); coreID++) {
         Core& core = cores[coreID];
-        cout << "Core " << coreID << ": " << core.getExecCycles() << " cycle(s)\n";
+        cout << "Core " << coreID << ": " << core.getCompCycles() << " cycle(s)\n";
     }
 
     cout << "------------------------------------\n";
@@ -56,7 +62,7 @@ void Runner::printStat() {
     for(int coreID = 0; coreID < cores.size(); coreID++) {
         Core& core = cores[coreID];
         cout << "Core " << coreID << ": " << core.getIdleCycles() << " cycle(s)\n";
-        /// sanity check 
+        /// sanity check
         assert(core.getIdleCycles() + core.getCompCycles() == core.getExecCycles());
     }
 
@@ -81,7 +87,7 @@ void Runner::printStat() {
     cout << "Update: " << bus.getUpdateCount() << " time(s)\n";
 
     cout << "------------------------------------\n";
-    
+
     cout << "Stat 8: (Private access distribution)\n";
     int totalPriv = 0;
     int totalAcc = 0;
@@ -115,7 +121,7 @@ bool Runner::checkReleaseCore() { /// if any core got release
         Core& core = cores[coreID];
         if (core.isFinish()) continue; /// freeze finish core
         core.refresh(curTime);
-        
+
         if (core.isFree()) {
             exist = true;
         }
@@ -127,7 +133,7 @@ bool Runner::checkCoreReq() {
     bool serveCacheReq = false;
 
     vector<pair<int, int>> coreOrder;
-    for(int coreID = 0; coreID < cores.size(); coreID++) { 
+    for(int coreID = 0; coreID < cores.size(); coreID++) {
         Core& core = cores[coreID];
         if (core.isFinish()) continue; ///freeze finished core
         if (!core.isFree()) continue;
@@ -138,7 +144,7 @@ bool Runner::checkCoreReq() {
     for(auto i : coreOrder) { /// ensure priority
         int coreID = i.second;
         Core& core = cores[coreID];
-        assert(!core.isFinish()); 
+        assert(!core.isFinish());
 
         assert(core.isFree());
 
@@ -151,7 +157,7 @@ bool Runner::checkCoreReq() {
             Cache& cache = caches[coreID];
             ///check if the cache hold this addr
             if (cache.hasEntry(addr)) {
-                /// no cache request generated
+                /// core always able to proceed
                 exist = true;
                 core.popTrace();
                 /// read hit
@@ -202,11 +208,11 @@ bool Runner::checkCoreReq() {
         }
         if (traceType == 2) { ///compute instruction
             exist = true;
-            core.popTrace(); /// pop core trace 
+            core.popTrace(); /// pop core trace
 
             int computeTime = trace.second;
             core.setBusy(curTime + computeTime); /// set busy for computeTime duration
-            /// update stat 4 
+            /// update stat 4
             core.incCompCycles(computeTime);
         }
         //cout << "Core " << coreID << " free at " << core.getNextFree() << endl;
@@ -230,6 +236,43 @@ void Runner::simulate() {
         progressTime(curTime + 1);
     }
     printStat();
+}
+
+void Runner::checkMem() {
+    vector<int> unfreezeBlock;
+    for(auto ite : invalidBlock) if (ite.second == curTime) {
+        unfreezeBlock.push_back(ite.first);
+    }
+    for(auto block : unfreezeBlock) {
+        invalidBlock.erase(block);
+    }
+}
+
+void Runner::progressTime(int newTime) {
+    for(auto &core : cores) {
+        core.progress(newTime - curTime);
+    }
+    curTime = newTime;
+    checkMem();
+}
+
+int Runner::getMemBlockAvailableTime(int blockNum) {
+    auto ite = invalidBlock.find(blockNum);
+    if (ite == invalidBlock.end()) {
+        return curTime;
+    }
+    assert(ite->second >= curTime);
+    return ite->second;
+}
+void Runner::cacheWriteBackMem(int cacheID, int addr) {
+    Cache& cache = caches[cacheID];
+    int blockNum = cache.getBlockNumber(addr);
+    assert(invalidBlock[blockNum] == INF); /// mem should not hold this address
+    invalidBlock[blockNum] = curTime + 100;
+
+    /// update stat 6 + 7
+    bus.incUpdateCount();
+    bus.incTrafficBlock();
 }
 
 Runner::~Runner() {

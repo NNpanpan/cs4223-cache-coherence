@@ -6,7 +6,7 @@ LINKERFLAG = -lm
 SRCS := $(wildcard *.cpp)
 BINS := $(patsubst %.cpp, %.o, ${SRCS})
 
-all : Bus.o Device.o Runner.o Core.o Cache.o MESIRunner.o
+all : Bus.o Device.o Runner.o Core.o Cache.o MESIRunner.o DragonRunner.o
 ${BINS} : %.o : %.cpp %.h
 	${CC} -c $^ ${CFLAGS}
 

@@ -1,6 +1,8 @@
 #ifndef RUNNER_H
 #define RUNNER_H
 
+#include <map> 
+
 #include "Core.h"
 #include "Bus.h"
 #include "Cache.h"
@@ -13,6 +15,15 @@ protected:
     vector<Cache> caches;
     Bus bus;
 
+    static const int INF = 2e9 + 10;
+    map<int, int> invalidBlock; /// store block that memory is not holding and first moment when it is available
+
+    void setMemBlockAvailableTime(int blockNum, int availTime);
+    void setMemBlockUnavailable(int blockNum);
+    int getMemBlockAvailableTime(int blockNum);
+    void cacheWriteBackMem(int cacheID, int addr);
+    void checkMem();
+
     int curTime;
 
     void printStat();
@@ -20,10 +31,9 @@ protected:
 
     bool checkReleaseCore();
     bool checkCoreReq();
+    void progressTime(int newTime);
 
     void printDebug();
-
-
 
 public:
     Runner(int cacheSize, int assoc, int blockSize,
@@ -37,7 +47,6 @@ public:
     virtual void simulateWriteHit(int coreID, int addr) = 0;
     virtual void simulateReadMiss(int coreID, int addr) = 0;
     virtual void simulateWriteMiss(int coreID, int addr) = 0;
-    virtual void progressTime(int newTime) = 0;
     virtual ~Runner();
 };
 

@@ -35,7 +35,9 @@ bool CacheEntry::isInvalid() {
 }
 
 bool CacheEntry::isPrivate() {
-    return getState() == "M"; /// modified
+    string state = getState();
+    if (state == "M") return true; /// modified
+    return false;
 }
 
 void CacheEntry::setLastUsed(int lastUsed) {
