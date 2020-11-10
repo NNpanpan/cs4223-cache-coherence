@@ -97,10 +97,10 @@ void Core::incCompCycles(int cycles) {
 
 void Core::progress(int cycles) {
     if (isFinish()) {
-        return; ///freeze finished core
+        return;     // Freeze finished core
     }
 
     assert(cycles > 0);
-    incExecCycles(cycles); /// stat 1
-
+    incExecCycles(cycles);      // Stat 1
 }
+

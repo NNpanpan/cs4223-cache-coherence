@@ -50,3 +50,4 @@ void Device::refresh(int curTime) {
         setFree();
     }
 }
+

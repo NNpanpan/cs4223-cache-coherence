@@ -7,17 +7,15 @@
 using namespace std;
 
 /*
-Class Bus:
-    - The common data bus
-*/
-
+ *  Class Bus:
+ *  - The common data bus
+ */
 class Bus {
 private:
     int blockSize;
-    int trafficData; /// stat 6
-    int invalidateCount; /// stat 7
-    int updateCount; /// stat 7
-
+    int trafficData;        // Stat 6
+    int invalidateCount;    // Stat 7
+    int updateCount;        // Stat 7
 
 public:
     Bus(int blockSize);
@@ -35,3 +33,4 @@ public:
 };
 
 #endif
+

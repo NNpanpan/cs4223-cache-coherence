@@ -11,7 +11,6 @@ Bus::Bus(int blockSize) {
     updateCount = 0;
 }
 
-
 int Bus::getTrafficData() {
     return trafficData;
 }
@@ -21,7 +20,7 @@ void Bus::incTrafficBlock(int numBlock) {
 }
 
 void Bus::incTrafficWord(int numWord) {
-    trafficData += 4 * numWord; ///default word size
+    trafficData += 4 * numWord;     // Default word size (4 bytes)
 }
 
 void Bus::incInvalidateCount() {
@@ -41,5 +40,6 @@ int Bus::getUpdateCount() {
 }
 
 int Bus::getWordPerBlock() {
-    return blockSize / 4; ///default word size
+    return blockSize / 4;           // Default word size (4 bytes)
 }
+

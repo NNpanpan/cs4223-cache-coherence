@@ -9,30 +9,32 @@
 using namespace std;
 
 /*
-Class Core:
-    - Represents the processor
-*/
-
+ *  Class Core:
+ *  - Represents the processor
+ */
 class Core : public Device {
 public: /// TBD : rechange to private, debugging
     queue<pair<int, int>> traceQ;
     int ID;
 
-    /// stat related
-    int execCycles; /// stat 1
-    int compCycles; /// stat 2
-    int idleCycles; /// stat 4
+    // For tracking execution statistics
+    int execCycles;         // Stat 1
+    int compCycles;         // Stat 2
+    int idleCycles;         // Stat 4
 
-    int loadCount;  /// stat 3
-    int storeCount; /// stat 3
-    int cacheMissCount; ///miss rate = cacheMissCount / (loadCount + storeCount) stat 5
-    int privateAccessCount; /// sharedAccess = loadCount - privateAccessCount stat 8
+    int loadCount;          // Stat 3
+    int storeCount;         // Stat 3
+
+    // Miss rate = cacheMissCount / (loadCount + storeCount)
+    int cacheMissCount;     // Stat 5
+    // sharedAccess = loadCount - privateAccessCount
+    int privateAccessCount; // Stat 8
 
 public:
     Core(vector<pair<int, int>> traces, int ID);
     bool isFinish();
 
-    pair<int, int> peekTrace(); /// return the first trace
+    pair<int, int> peekTrace();     // Returns the first trace
     void popTrace();
 
     int getID();
@@ -60,3 +62,4 @@ public:
 };
 
 #endif
+

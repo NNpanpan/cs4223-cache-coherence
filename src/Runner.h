@@ -11,20 +11,21 @@ using namespace std;
 
 class Runner {
 protected:
+    int curTime;
+
     vector<Core> cores;
     vector<Cache> caches;
     Bus bus;
 
     static const int INF = 2e9 + 10;
-    map<int, int> invalidBlock; /// store block that memory is not holding and first moment when it is available
+    // Store blocks that memory is not holding and first moment when it is available
+    map<int, int> invalidBlock;
 
     void setMemBlockAvailableTime(int blockNum, int availTime);
     void setMemBlockUnavailable(int blockNum);
     int getMemBlockAvailableTime(int blockNum);
     void cacheWriteBackMem(int cacheID, int addr);
     void checkMem();
-
-    int curTime;
 
     void printStat();
     bool isAllFinish();
@@ -40,9 +41,9 @@ public:
         vector<vector<pair<int, int>>> coreTraces);
 
     void simulate();
-    //virtual bool execCacheReq(CacheReq req) = 0;
+    // virtual bool execCacheReq(CacheReq req) = 0;
 
-    /// note: these function use curTime, so have not count 1 cycle for cache check yet
+    // Note: these function use curTime, so have not counted 1 cycle for cache check yet
     virtual void simulateReadHit(int coreID, int addr) = 0;
     virtual void simulateWriteHit(int coreID, int addr) = 0;
     virtual void simulateReadMiss(int coreID, int addr) = 0;
@@ -51,3 +52,4 @@ public:
 };
 
 #endif
+
