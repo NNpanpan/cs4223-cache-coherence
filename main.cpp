@@ -20,6 +20,12 @@ vector<vector<CoreOps>> readBenchmark(string benchmark) {
         FILE* file = fopen(relFile.c_str(), "r");
 
         if (file == NULL) {
+            // Try to locate file again if in sub-directory, e.g. /scripts
+            relFile = "../" + relFile;
+            file = fopen(relFile.c_str(), "r");
+        }
+
+        if (file == NULL) {
             cerr << "Trace file " << fileName << " does not exist!\n\n";
             exit(-1);
         }
