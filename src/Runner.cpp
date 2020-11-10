@@ -42,7 +42,7 @@ void Runner::cacheWriteBackMem(int cacheID, int addr) {
     invalidBlock[blockNum] = curTime + 100;
 
     // Update stats 6 + 7
-    bus.incUpdateCount();
+    bus.incWritebackCount();
     bus.incTrafficBlock();
 }
 
@@ -113,14 +113,15 @@ void Runner::printStat() {
 
     cout << "------------------------------------\n";
 
-    cout << "Stat 6: (Bus traffic size)\n";
+    cout << "Stat 6: (Bus traffic amount)\n";
     cout << bus.getTrafficData() << " byte(s)\n";
 
     cout << "------------------------------------\n";
 
-    cout << "Stat 7: (Invalidation / Update)\n";
+    cout << "Stat 7: (Invalidation / Update / Write-back)\n";
     cout << "Invalidation: " << bus.getInvalidateCount() << " time(s)\n";
     cout << "Update: " << bus.getUpdateCount() << " time(s)\n";
+    cout << "Write-back: " << bus.getWritebackCount() << " time(s)\n";
 
     cout << "------------------------------------\n";
 
@@ -183,8 +184,8 @@ bool Runner::checkCoreReq() {
     for(auto i : coreOrder) {           // Ensure priority
         int coreID = i.second;
         Core& core = cores[coreID];
-        assert(!core.isFinish());
 
+        assert(!core.isFinish());
         assert(core.isFree());
 
         pair<int, int> trace = core.peekTrace();

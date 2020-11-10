@@ -16,6 +16,7 @@ private:
     int trafficData;        // Stat 6
     int invalidateCount;    // Stat 7
     int updateCount;        // Stat 7
+    int writebackCount;     // Stat 7
 
 public:
     Bus(int blockSize);
@@ -30,6 +31,8 @@ public:
     int getInvalidateCount();
     void incUpdateCount();
     int getUpdateCount();
+    void incWritebackCount();
+    int getWritebackCount();
 };
 
 #endif

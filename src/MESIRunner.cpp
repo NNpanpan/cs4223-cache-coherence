@@ -10,57 +10,60 @@ MESIRunner::MESIRunner(int cacheSize, int assoc, int blockSize,
 }
 
 bool MESIRunner::cacheAllocAddr(int cacheID, int addr, string addrState) {
-    /// fetch a block from mem, alloc a cache block and evict another block if needed
+    // Fetch a block from mem, allocate a line, evicting another block if needed
     Cache& cache = caches[cacheID];
-
     int blockNum = cache.getBlockNumber(addr);
 
-    /// additional 100 cycles
+    // Data only available from memory after additional 100 cycles
     int availableTime = getMemBlockAvailableTime(blockNum) + 100;
 
-    /// assuming evict before alloc
+    // Pre-condition: find an available line (evict one if none available)
     CacheEntry evictedEntry = cache.evictEntry(addr);
-    /// if that entry is valid, mean cache set conflict
+    // If entry is valid, this is the victim block (cache set conflict)
     if (!evictedEntry.isInvalid()) {
-        /// need to rewrite if in "M" state
+        // Perform write-back to update mem if victim block in 'M' state
         if (evictedEntry.getState() == "M") {
             int evictedAddr = cache.getHeadAddr(evictedEntry);
             cacheWriteBackMem(cacheID, evictedAddr);
-            availableTime += 100; /// 100 cycles first to evict this addr
+            availableTime += 100;   // Need 100 cycles to write-back this block
         }
     }
 
-    //cout << "Cache " << cacheID << " have " << addr << " at " << availableTime << endl;
+    // cout << "Cache " << cacheID << " have " << addr << " at " << availableTime << endl;
 
     cache.allocEntry(addr, addrState, curTime, availableTime);
     return true;
 }
 
 void MESIRunner::invalidateO(int cacheID, int addr, bool needWriteBack) {
-    /// invalidate all other caches
-    for(int othCacheID = 0; othCacheID < caches.size(); othCacheID++) {
+    // Invalidate all other copies in other caches
+    for(int othCacheID = 0; othCacheID < (int) caches.size(); othCacheID++) {
         if (othCacheID == cacheID) continue;
         Cache& othCache = caches[othCacheID];
+
         if (othCache.hasEntry(addr)) {
-            ///if that entry is 'M'
+            // If copy is dirty ('M' state) - only one process holds line
             if (othCache.isAddrPrivate(addr) && needWriteBack) {
                 cacheWriteBackMem(othCacheID, addr);
             }
-            /// immediately invalidate that entry, regardless of its state
+
+            // Otherwise immediately invalidate that entry, whatever its state
             othCache.setBlockState(addr, "I");
-            /// update stat 7
+
+            // Update stat 7
             bus.incInvalidateCount();
         }
     }
 }
 
 void MESIRunner::simulateReadHit(int coreID, int addr) {
-    //cout << "Core " << coreID << " read hit addr " << addr << " at " << curTime << endl;
+    // cout << "Core " << coreID << " read hit addr " << addr << " at " << curTime << endl;
     Cache& cache = caches[coreID];
     cache.setBlockLastUsed(addr, curTime);
 }
+
 void MESIRunner::simulateWriteHit(int coreID, int addr) {
-    //cout << "Core " << coreID << " write hit addr " << addr << " at " << curTime << endl;
+    // cout << "Core " << coreID << " write hit addr " << addr << " at " << curTime << endl;
     int cacheID = coreID;
     Cache& cache = caches[cacheID];
     string blockState = cache.getBlockState(addr);
@@ -68,63 +71,70 @@ void MESIRunner::simulateWriteHit(int coreID, int addr) {
     cache.setBlockLastUsed(addr, curTime);
     cache.setBlockState(addr, "M");
 
-    /// should have no other cache in 'M' so this will only invalidate them
+    // Should have no other copies in 'M'/'E' so this will only invalidate them
+    // No write-back needed
     invalidateO(cacheID, addr, false);
 
-    /// mem does not hold a copy
+    // Mem does not hold an updated copy
     int blockNum = cache.getBlockNumber(addr);
     invalidBlock[blockNum] = INF;
 }
 
 void MESIRunner::simulateReadMiss(int coreID, int addr) {
-    //cout << "Core " << coreID << " read miss addr " << addr << " at " << curTime << endl;
+    // cout << "Core " << coreID << " read miss addr " << addr << " at " << curTime << endl;
     int cacheID = coreID;
-    Cache &cache = caches[cacheID];
 
-    /// check if any cache hold modified address
-    for(int othCacheID = 0; othCacheID < caches.size(); othCacheID++) {
+    // Check if any cache holds modified address
+    for(int othCacheID = 0; othCacheID < (int) caches.size(); othCacheID++) {
         if (othCacheID == cacheID) continue;
+
         Cache& othCache = caches[othCacheID];
         if (othCache.hasEntry(addr)) {
             if (othCache.isAddrPrivate(addr)) {
-                /// snooping write
+                // Snooped write
                 cacheWriteBackMem(othCacheID, addr);
                 othCache.setBlockState(addr, "S");
             }
         }
     }
-    /// check if cache should go to 'E' or 'S'
+
+    // Determine if line should transition to 'E' or 'S'
     int countHold = 0;
-    for(int othCacheID = 0; othCacheID < caches.size(); othCacheID++) {
+    for(int othCacheID = 0; othCacheID < (int) caches.size(); othCacheID++) {
         if (othCacheID == cacheID) continue;
         Cache& othCache = caches[othCacheID];
         if (othCache.hasEntry(addr)) {
             countHold++;
         }
     }
+
     string addrState = (countHold == 0) ? "E" : "S";
     cacheAllocAddr(cacheID, addr, addrState);
 
-    /// update stat 6 + 7
+    // Update stat 6 + 7
     bus.incTrafficBlock();
 }
+
 void MESIRunner::simulateWriteMiss(int coreID, int addr) {
-    //cout << "Core " << coreID << " write miss addr " << addr << " at " << curTime << endl;
+    // cout << "Core " << coreID << " write miss addr " << addr << " at " << curTime << endl;
     int cacheID = coreID;
     Cache& cache = caches[cacheID];
+
+    // Invalidate with write-back if another cache a copy in 'M' state
     invalidateO(cacheID, addr, true);
-    /// go to 'M' state
+
+    // Transition to 'M' state
     string addrState = "M";
     cacheAllocAddr(cacheID, addr, addrState);
 
-    /// mem does not hold a copy
+    // Mme does not hold an updated copy
     int blockNum = cache.getBlockNumber(addr);
     invalidBlock[blockNum] = INF;
 
-    /// update stat 6 + 7
+    // Update stat 6 + 7
     bus.incTrafficBlock();
 }
 
-
 MESIRunner::~MESIRunner() {
 }
+

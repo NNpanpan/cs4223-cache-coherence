@@ -9,7 +9,8 @@ class MESIRunner : public Runner {
 private:
     bool cacheAllocAddr(int cacheID, int addr, string state);
 
-    /// if needWriteBack is true, then cache in 'M' state need to write back to mem
+    // If needWriteBack is true, line being invalidated in 'M' state
+    // Requires write-back of dirty block to mem
     void invalidateO(int cacheID, int addr, bool needWriteBack);
 
 public:
@@ -23,3 +24,4 @@ public:
 };
 
 #endif
+

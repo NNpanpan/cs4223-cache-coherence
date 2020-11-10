@@ -9,6 +9,7 @@ Bus::Bus(int blockSize) {
     trafficData = 0;
     invalidateCount = 0;
     updateCount = 0;
+    writebackCount = 0;
 }
 
 int Bus::getTrafficData() {
@@ -37,6 +38,14 @@ void Bus::incUpdateCount() {
 
 int Bus::getUpdateCount() {
     return updateCount;
+}
+
+void Bus::incWritebackCount() {
+    writebackCount++;
+}
+
+int Bus::getWritebackCount() {
+    return writebackCount;
 }
 
 int Bus::getWordPerBlock() {
