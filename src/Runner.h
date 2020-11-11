@@ -13,6 +13,8 @@ class Runner {
 protected:
     int curTime;
 
+    int blockSize;
+    
     vector<Core> cores;
     vector<Cache> caches;
     Bus bus;
@@ -20,6 +22,11 @@ protected:
     static const int INF = 2e9 + 10;
     // Store blocks that memory is not holding and first moment when it is available
     map<int, int> invalidBlock;
+    // Store activeBlocks and their request time.
+    map<int, int> activeBlocks;
+
+    // bool sortCores(const pair<int, pair<int, int>> &a, const pair<int, pair<int, int>> &b);
+    int getHeadAddr(int addr);
 
     void setMemBlockAvailableTime(int blockNum, int availTime);
     void setMemBlockUnavailable(int blockNum);

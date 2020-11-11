@@ -10,6 +10,7 @@ Core::Core(vector<pair<int, int>> traces, int ID) : Device() {
     for(auto trace : traces) {
         traceQ.push(trace);
     }
+    lastCacheReq = -1;
 
     execCycles = 0;
     compCycles = 0;
@@ -37,6 +38,14 @@ void Core::popTrace() {
 
 int Core::getID() {
     return ID;
+}
+
+int Core::getLastCacheReq() {
+    return lastCacheReq;
+}
+
+void Core::setLastCacheReq(int time) {
+    lastCacheReq = time;
 }
 
 void Core::incLoadCount() {

@@ -16,6 +16,7 @@ class Core : public Device {
 public: /// TBD : rechange to private, debugging
     queue<pair<int, int>> traceQ;
     int ID;
+    int lastCacheReq;
 
     // For tracking execution statistics
     int execCycles;         // Stat 1
@@ -38,6 +39,9 @@ public:
     void popTrace();
 
     int getID();
+
+    int getLastCacheReq();
+    void setLastCacheReq(int time);
 
     void incLoadCount();
     int getLoadCount();

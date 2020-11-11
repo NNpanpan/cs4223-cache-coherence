@@ -7,12 +7,17 @@ using namespace std;
 Runner::Runner(int cacheSize, int assoc, int blockSize,
         vector<vector<pair<int, int>>> coreTraces) : bus(blockSize) {
     curTime = 0;
+    this->blockSize = blockSize;
 
     int numberOfCores = 4;
     for(int ID = 0; ID < numberOfCores; ID++) {
         caches.push_back(Cache(assoc, blockSize, cacheSize, ID));
         cores.push_back(Core(coreTraces[ID], ID));
     }
+}
+
+int Runner::getHeadAddr(int addr) {
+    return (addr / blockSize) * blockSize;
 }
 
 void Runner::setMemBlockAvailableTime(int blockNum, int availTime) {
@@ -164,25 +169,46 @@ bool Runner::checkReleaseCore() {
         }
     }
 
+    vector<int> doneBlocks;
+    for (auto elem : activeBlocks) {
+        int coreID = elem.second;
+        Core& core = cores[coreID];
+
+        if (core.isFree() || core.isFinish()) // core requesting the block is done
+            doneBlocks.push_back(elem.first);
+    }
+
+    for (auto block : doneBlocks)
+        activeBlocks.erase(block);
+
     return exist;
+}
+
+bool sortCores(const pair<int, pair<int, int>> &a, const pair<int, pair<int, int>> &b) {
+    // First element is Core's NextFree, Second element is Core's lastCacheReq, Third is Core ID
+    if (a.first == b.first) {
+        return a.second.first < b.second.first;
+    }
+    return a.first < b.first;
 }
 
 bool Runner::checkCoreReq() {
     bool exist = false;
     bool serveCacheReq = false;
 
-    vector<pair<int, int>> coreOrder;
+    // vector<pair<int, int>> coreOrder;
+    vector<pair<int, pair<int, int>>> coreOrder;
     for(int coreID = 0; coreID < (int) cores.size(); coreID++) {
         Core& core = cores[coreID];
         if (core.isFinish()) continue;  // Freeze finished core
         if (!core.isFree()) continue;
-        coreOrder.push_back(make_pair(core.getNextFree(), coreID));
+        coreOrder.push_back(make_pair(core.getNextFree(), make_pair(core.getLastCacheReq(), coreID)));
     }
 
-    sort(coreOrder.begin(), coreOrder.end());
+    sort(coreOrder.begin(), coreOrder.end(), sortCores);
 
     for(auto i : coreOrder) {           // Ensure priority
-        int coreID = i.second;
+        int coreID = i.second.second;
         Core& core = cores[coreID];
 
         assert(!core.isFinish());
@@ -193,10 +219,13 @@ bool Runner::checkCoreReq() {
         int traceType = trace.first;
         int addr = trace.second;
 
+        // cout << "core " << coreID << " " << traceType <<  " " << addr << endl;
+
         if (traceType == 0 || traceType == 1) { // Load/store instruction
             Cache& cache = caches[coreID];
             // Check if cache holds block containing this addr
             if (cache.hasEntry(addr)) {
+                // cout << "core " << coreID << " hit\n";
                 // Core always able to proceed if it has the cache line
                 exist = true;
                 core.popTrace();
@@ -211,17 +240,21 @@ bool Runner::checkCoreReq() {
             } else {
                 // Can delay cache request and update of stats
                 // Since for cache miss, snooping won't lead to hit
-                if (serveCacheReq) {
+                if (serveCacheReq || activeBlocks.find(getHeadAddr(addr)) != activeBlocks.end()) {
                     // Stall core if bus already serving a cache request
+                    // or block request is active
                     core.incIdleCycles(1);
                     continue;
                 }
+                // cout << "core " << coreID << " miss\n";
 
                 serveCacheReq = true;
                 exist = true;
                 core.popTrace();
                 // Cache miss -> update stat 5
                 core.incCacheMissCount();
+                activeBlocks[getHeadAddr(addr)] = coreID;
+                core.setLastCacheReq(curTime);
 
                 // Read miss
                 if (traceType == 0) {
