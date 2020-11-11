@@ -76,7 +76,10 @@ void DragonRunner::cacheReceiveB(int cacheID, int addr, string state) {
 
     int cacheAvailableTime = max(findCacheSourceAvailableTime(cacheID, addr), curTime);
     int memAvailableTime = max(findMemSourceAvailableTime(cacheID, addr), curTime);
-    int availableTime = min(memAvailableTime + 100, cacheAvailableTime + 2 * bus.getWordPerBlock());
+    // int availableTime = min(memAvailableTime + 100, cacheAvailableTime + 2 * bus.getWordPerBlock());
+    int availableTime = cacheAvailableTime == INF 
+        ? memAvailableTime + 100 
+        : cacheAvailableTime + 2 * bus.getWordPerBlock();
 
     /// assuming evict before alloc
     CacheEntry evictedEntry = cache.evictEntry(addr);
@@ -92,7 +95,10 @@ void DragonRunner::cacheReceiveB(int cacheID, int addr, string state) {
 
             int newMemAvailableTime = max(curTime + 100, memAvailableTime);
             int newCacheAvailableTime = max(curTime + 100, cacheAvailableTime);
-            availableTime = min(newMemAvailableTime + 100, newCacheAvailableTime + 2 * bus.getWordPerBlock()); /// 100 cycles first to evict this addr
+            // availableTime = min(newMemAvailableTime + 100, newCacheAvailableTime + 2 * bus.getWordPerBlock()); /// 100 cycles first to evict this addr
+            availableTime = newCacheAvailableTime == INF 
+                ? newMemAvailableTime + 100 
+                : newCacheAvailableTime + 2 * bus.getWordPerBlock();
 
             /*
             availableTime = max(availableTime, curTime + 100);
@@ -118,11 +124,14 @@ void DragonRunner::broadcastWOthCache(int cacheID, int addr, int sendCycle) {
         if (othCache.hasEntry(addr)) {
             cacheReceiveW(othCacheID, addr, sendCycle);
             othCache.setBlockState(addr, "Sc");
+
+            /// update stat 7
+            bus.incUpdateCount();
         }
     }
 
-    /// update stat 7
-    bus.incUpdateCount();
+    // /// update stat 7
+    // bus.incUpdateCount();
 }
 void DragonRunner::simulateReadHit(int coreID, int addr) {
     Cache& cache = caches[coreID];
