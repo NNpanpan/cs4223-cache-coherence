@@ -20,14 +20,6 @@ int Runner::getHeadAddr(int addr) {
     return (addr / blockSize) * blockSize;
 }
 
-void Runner::setMemBlockAvailableTime(int blockNum, int availTime) {
-    invalidBlock[blockNum] = availTime;
-}
-
-void Runner::setMemBlockUnavailable(int blockNum) {
-    setMemBlockAvailableTime(blockNum, INF);
-}
-
 int Runner::getMemBlockAvailableTime(int blockNum) {
     auto ite = invalidBlock.find(blockNum);
     if (ite == invalidBlock.end()) {
@@ -65,7 +57,6 @@ void Runner::checkMem() {
 // Helper functions
 
 void Runner::printStat() {
-    /// TBD : should be simple enough
     cout << fixed;
 
     int numCores = (int) cores.size();
@@ -184,31 +175,22 @@ bool Runner::checkReleaseCore() {
     return exist;
 }
 
-bool sortCores(const pair<int, pair<int, int>> &a, const pair<int, pair<int, int>> &b) {
-    // First element is Core's NextFree, Second element is Core's lastCacheReq, Third is Core ID
-    if (a.first == b.first) {
-        return a.second.first < b.second.first;
-    }
-    return a.first < b.first;
-}
-
 bool Runner::checkCoreReq() {
     bool exist = false;
     bool serveCacheReq = false;
 
-    // vector<pair<int, int>> coreOrder;
-    vector<pair<int, pair<int, int>>> coreOrder;
+    vector<pair<int, int>> coreOrder;
     for(int coreID = 0; coreID < (int) cores.size(); coreID++) {
         Core& core = cores[coreID];
         if (core.isFinish()) continue;  // Freeze finished core
         if (!core.isFree()) continue;
-        coreOrder.push_back(make_pair(core.getNextFree(), make_pair(core.getLastCacheReq(), coreID)));
+        coreOrder.push_back(make_pair(core.getNextFree(), coreID));
     }
 
-    sort(coreOrder.begin(), coreOrder.end(), sortCores);
+    sort(coreOrder.begin(), coreOrder.end());
 
     for(auto i : coreOrder) {           // Ensure priority
-        int coreID = i.second.second;
+        int coreID = i.second;
         Core& core = cores[coreID];
 
         assert(!core.isFinish());
@@ -219,13 +201,10 @@ bool Runner::checkCoreReq() {
         int traceType = trace.first;
         int addr = trace.second;
 
-        // cout << "core " << coreID << " " << traceType <<  " " << addr << endl;
-
         if (traceType == 0 || traceType == 1) { // Load/store instruction
             Cache& cache = caches[coreID];
             // Check if cache holds block containing this addr
             if (cache.hasEntry(addr)) {
-                // cout << "core " << coreID << " hit\n";
                 // Core always able to proceed if it has the cache line
                 exist = true;
                 core.popTrace();
@@ -246,7 +225,6 @@ bool Runner::checkCoreReq() {
                     core.incIdleCycles(1);
                     continue;
                 }
-                // cout << "core " << coreID << " miss\n";
 
                 serveCacheReq = true;
                 exist = true;
@@ -254,7 +232,6 @@ bool Runner::checkCoreReq() {
                 // Cache miss -> update stat 5
                 core.incCacheMissCount();
                 activeBlocks[getHeadAddr(addr)] = coreID;
-                core.setLastCacheReq(curTime);
 
                 // Read miss
                 if (traceType == 0) {
@@ -294,7 +271,6 @@ bool Runner::checkCoreReq() {
             // Update stat 4
             core.incCompCycles(computeTime);
         }
-        // cout << "Core " << coreID << " free at " << core.getNextFree() << endl;
     }
 
     return exist;

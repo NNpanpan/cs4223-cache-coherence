@@ -22,14 +22,11 @@ protected:
     static const int INF = 2e9 + 10;
     // Store blocks that memory is not holding and first moment when it is available
     map<int, int> invalidBlock;
-    // Store activeBlocks and their request time.
+    // Store activeBlocks and their request ID.
     map<int, int> activeBlocks;
 
-    // bool sortCores(const pair<int, pair<int, int>> &a, const pair<int, pair<int, int>> &b);
     int getHeadAddr(int addr);
 
-    void setMemBlockAvailableTime(int blockNum, int availTime);
-    void setMemBlockUnavailable(int blockNum);
     int getMemBlockAvailableTime(int blockNum);
     void cacheWriteBackMem(int cacheID, int addr);
     void checkMem();

@@ -1,9 +1,5 @@
 #include "MESIRunner.h"
 
-#include <bits/stdc++.h>
-
-using namespace std;
-
 MESIRunner::MESIRunner(int cacheSize, int assoc, int blockSize,
     vector<vector<pair<int, int>>> coreTraces)
     : Runner(cacheSize, assoc, blockSize, coreTraces) {
@@ -28,8 +24,6 @@ bool MESIRunner::cacheAllocAddr(int cacheID, int addr, string addrState) {
             availableTime += 100;   // Need 100 cycles to write-back this block
         }
     }
-
-    // cout << "Cache " << cacheID << " have " << addr << " at " << availableTime << endl;
 
     cache.allocEntry(addr, addrState, curTime, availableTime);
     return true;
@@ -57,13 +51,11 @@ void MESIRunner::invalidateO(int cacheID, int addr, bool needWriteBack) {
 }
 
 void MESIRunner::simulateReadHit(int coreID, int addr) {
-    // cout << "Core " << coreID << " read hit addr " << addr << " at " << curTime << endl;
     Cache& cache = caches[coreID];
     cache.setBlockLastUsed(addr, curTime);
 }
 
 void MESIRunner::simulateWriteHit(int coreID, int addr) {
-    // cout << "Core " << coreID << " write hit addr " << addr << " at " << curTime << endl;
     int cacheID = coreID;
     Cache& cache = caches[cacheID];
     string blockState = cache.getBlockState(addr);
@@ -81,7 +73,6 @@ void MESIRunner::simulateWriteHit(int coreID, int addr) {
 }
 
 void MESIRunner::simulateReadMiss(int coreID, int addr) {
-    // cout << "Core " << coreID << " read miss addr " << addr << " at " << curTime << endl;
     int cacheID = coreID;
 
     // Check if any cache holds modified address
@@ -116,7 +107,6 @@ void MESIRunner::simulateReadMiss(int coreID, int addr) {
 }
 
 void MESIRunner::simulateWriteMiss(int coreID, int addr) {
-    // cout << "Core " << coreID << " write miss addr " << addr << " at " << curTime << endl;
     int cacheID = coreID;
     Cache& cache = caches[cacheID];
 

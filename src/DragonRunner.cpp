@@ -64,7 +64,6 @@ void DragonRunner::cacheReceiveW(int cacheID, int addr, int sendCycle) {
 }
 
 void DragonRunner::cacheReceiveB(int cacheID, int addr, string state) {
-    /// TBD: actually equal to cacheAllocAddr in MESIRunner
     /// passive receive
     Cache& cache = caches[cacheID];
     assert(!cache.hasEntry(addr));
@@ -106,14 +105,12 @@ void DragonRunner::cacheReceiveB(int cacheID, int addr, string state) {
         }
     }
 
-
     cache.allocEntry(addr, state, curTime, availableTime);
 
     /// update stat 6
     bus.incTrafficBlock();
 }
 void DragonRunner::broadcastWOthCache(int cacheID, int addr, int sendCycle) {
-
     /// word broadcast
     int countHold = countOthCacheHold(cacheID, addr);
     assert(countHold > 0);
@@ -129,13 +126,11 @@ void DragonRunner::broadcastWOthCache(int cacheID, int addr, int sendCycle) {
             bus.incUpdateCount();
         }
     }
-
-    // /// update stat 7
-    // bus.incUpdateCount();
 }
 void DragonRunner::simulateReadHit(int coreID, int addr) {
     Cache& cache = caches[coreID];
     string state = cache.getBlockState(addr);
+    
     /// do nothing, set last use and done
     cache.setBlockLastUsed(addr, curTime);
 }
@@ -149,6 +144,7 @@ void DragonRunner::simulateWriteHit(int coreID, int addr) {
     if (state == "M") {
         /// do nothing
     }
+
     if (state == "Sc" || state == "Sm") {
         /// check if cache should go to 'M' or 'Sm'
         int countHold = countOthCacheHold(coreID, addr);
@@ -162,6 +158,7 @@ void DragonRunner::simulateWriteHit(int coreID, int addr) {
         }
         cache.setBlockState(addr, addrState);
     }
+
     if (state == "E") {
         /// go to M
         cache.setBlockState(addr, "M");

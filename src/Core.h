@@ -13,10 +13,8 @@ using namespace std;
  *  - Represents the processor
  */
 class Core : public Device {
-public: /// TBD : rechange to private, debugging
-    queue<pair<int, int>> traceQ;
+private:
     int ID;
-    int lastCacheReq;
 
     // For tracking execution statistics
     int execCycles;         // Stat 1
@@ -32,6 +30,8 @@ public: /// TBD : rechange to private, debugging
     int privateAccessCount; // Stat 8
 
 public:
+    queue<pair<int, int>> traceQ; // For tracking purpose
+
     Core(vector<pair<int, int>> traces, int ID);
     bool isFinish();
 
@@ -39,9 +39,6 @@ public:
     void popTrace();
 
     int getID();
-
-    int getLastCacheReq();
-    void setLastCacheReq(int time);
 
     void incLoadCount();
     int getLoadCount();
