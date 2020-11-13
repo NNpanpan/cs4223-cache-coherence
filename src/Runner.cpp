@@ -214,13 +214,15 @@ bool Runner::checkCoreReq() {
                     simulateReadHit(cache.getID(), addr);
                 }
                 // Write hit
-                if (traceType == 1 && activeBlocks.find(getHeadAddr(addr)) == activeBlocks.end()) {
+                if (traceType == 1) {
                     // Can only write if the cache line is not in transaction
-                    core.popTrace();
-                    simulateWriteHit(cache.getID(), addr);
-                } else {
-                    core.incIdleCycles(1);
-                    continue;
+                    if (activeBlocks.find(getHeadAddr(addr)) == activeBlocks.end()) {
+                        core.popTrace();
+                        simulateWriteHit(cache.getID(), addr);
+                    } else {
+                        core.incIdleCycles(1);
+                        continue;
+                    }
                 }
             } else {
                 // Can delay cache request and update of stats
