@@ -175,22 +175,32 @@ bool Runner::checkReleaseCore() {
     return exist;
 }
 
+bool sortCores(const pair<int, pair<int, int>> &a, const pair<int, pair<int, int>> &b) {
+    // First element is Core's NextFree, Second element is Core's lastCacheReq, Third is Core ID
+    if (a.first == b.first) {
+        return a.second.first < b.second.first;
+    }
+    return a.first < b.first;
+}
+
 bool Runner::checkCoreReq() {
     bool exist = false;
     bool serveCacheReq = false;
 
-    vector<pair<int, int>> coreOrder;
+    // vector<pair<int, int>> coreOrder;
+    vector<pair<int, pair<int, int>>> coreOrder;
     for(int coreID = 0; coreID < (int) cores.size(); coreID++) {
         Core& core = cores[coreID];
         if (core.isFinish()) continue;  // Freeze finished core
         if (!core.isFree()) continue;
-        coreOrder.push_back(make_pair(core.getNextFree(), coreID));
+        // coreOrder.push_back(make_pair(core.getNextFree(), coreID));
+        coreOrder.push_back(make_pair(core.getNextFree(), make_pair(core.getLastCacheReq(), coreID)));
     }
 
-    sort(coreOrder.begin(), coreOrder.end());
+    sort(coreOrder.begin(), coreOrder.end(), sortCores);
 
     for(auto i : coreOrder) {           // Ensure priority
-        int coreID = i.second;
+        int coreID = i.second.second;
         Core& core = cores[coreID];
 
         assert(!core.isFinish());
@@ -240,6 +250,7 @@ bool Runner::checkCoreReq() {
                 // Cache miss -> update stat 5
                 core.incCacheMissCount();
                 activeBlocks[getHeadAddr(addr)] = coreID;
+                core.setLastCacheReq(curTime);
 
                 // Read miss
                 if (traceType == 0) {

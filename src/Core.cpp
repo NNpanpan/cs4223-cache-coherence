@@ -10,6 +10,8 @@ Core::Core(vector<pair<int, int>> traces, int ID) : Device() {
     for(auto trace : traces) {
         traceQ.push(trace);
     }
+    lastCacheReq = -1;
+
 
     execCycles = 0;
     compCycles = 0;
@@ -19,6 +21,14 @@ Core::Core(vector<pair<int, int>> traces, int ID) : Device() {
     storeCount = 0; 
     cacheMissCount = 0;
     privateAccessCount = 0;
+}
+
+int Core::getLastCacheReq() {
+    return lastCacheReq;
+}
+
+void Core::setLastCacheReq(int time) {
+    lastCacheReq = time;
 }
 
 bool Core::isFinish() {

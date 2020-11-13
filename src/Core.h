@@ -16,6 +16,8 @@ class Core : public Device {
 private:
     int ID;
 
+    int lastCacheReq;
+
     // For tracking execution statistics
     int execCycles;         // Stat 1
     int compCycles;         // Stat 2
@@ -39,6 +41,9 @@ public:
     void popTrace();
 
     int getID();
+
+    int getLastCacheReq();
+    void setLastCacheReq(int time);
 
     void incLoadCount();
     int getLoadCount();
