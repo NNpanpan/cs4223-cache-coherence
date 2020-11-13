@@ -207,14 +207,20 @@ bool Runner::checkCoreReq() {
             if (cache.hasEntry(addr)) {
                 // Core always able to proceed if it has the cache line
                 exist = true;
-                core.popTrace();
+                // core.popTrace();
                 // Read hit
                 if (traceType == 0) {
+                    core.popTrace();
                     simulateReadHit(cache.getID(), addr);
                 }
                 // Write hit
-                if (traceType == 1) {
+                if (traceType == 1 && activeBlocks.find(getHeadAddr(addr)) == activeBlocks.end()) {
+                    // Can only write if the cache line is not in transaction
+                    core.popTrace();
                     simulateWriteHit(cache.getID(), addr);
+                } else {
+                    core.incIdleCycles(1);
+                    continue;
                 }
             } else {
                 // Can delay cache request and update of stats
