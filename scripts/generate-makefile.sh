@@ -19,8 +19,8 @@ DEF_ASSOC=2
 DEF_BLOCK=16
 
 # Parameters to vary from default
-cache_size=(128 256 512 1024 2048 4096 8192 16384 32768 65536)
-assoc=(1 2 4 8 16 32 64 128 256 512)
+cache_size=(65536 32768 16384 8192 4096 2048 1024 512 256 128)
+assoc=(512 256 128 64 32 16 8 4 2 1)
 block_size=(4 8 16 32 64 128 256 512 1024 2048)
 
 # Remove existing generated makefile

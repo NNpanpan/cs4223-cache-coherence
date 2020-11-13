@@ -34,6 +34,8 @@ do
         filename=$(basename $file)
         log="$(cat $file)"
 
+        echo "Processing $filename"
+
         # First parse simulation parameters from simulation log filename
         p="${BASH_REMATCH[1]}"
         bm="${BASH_REMATCH[2]}"
@@ -119,7 +121,6 @@ do
             exit 1
         fi
 
-        echo $data
         echo $data >> $OUTPUT_PATH
     else
         echo "Ignoring non-simulation log [$file]!"
