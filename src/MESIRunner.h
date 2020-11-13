@@ -12,8 +12,10 @@ private:
     // If needWriteBack is true, line being invalidated in 'M' state
     // Requires write-back of dirty block to mem
     void invalidateO(int cacheID, int addr, bool needWriteBack);
+
 protected:
     void progressTime(int newTime) override;
+
 public:
     MESIRunner(int cacheSize, int assoc, int blockSize,
         vector<vector<pair<int, int>>> coreTraces);

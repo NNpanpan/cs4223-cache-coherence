@@ -21,6 +21,7 @@ public:
     int getBlockNumber();
 
     bool isInvalid();
+    bool isModified();
     bool isPrivate();
 
     void setLastUsed(int lastUsed);
@@ -78,11 +79,13 @@ public:
     void setBlockState(int addr, string newState);
     string getBlockState(int addr);
 
-    // Returns true if line containing this block in M state, false otherwise
+    // Returns true if block is dirty (M state), false otherwise
+    bool isAddrDirty(int addr);
+    // Returns true if block is in E or M state, false otherwise
     bool isAddrPrivate(int addr);
     // Returns true if block not in cache/in cache with I state, false otherwise
     bool isAddrInvalid(int addr);
- 
+
     // Returns time (cycles) when the block containing addr is loaded into cache
     int getAddrUsableTime(int addr);
     /*  END PRE-CONDITION */

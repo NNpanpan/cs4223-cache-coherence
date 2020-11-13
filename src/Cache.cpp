@@ -36,10 +36,13 @@ bool CacheEntry::isInvalid() {
     return getState() == "I";
 }
 
+bool CacheEntry::isModified() {
+    return state == "M";
+}
+
 bool CacheEntry::isPrivate() {
     string state = getState();
-    if (state == "M") return true;      // Modified
-    return false;
+    return (state == "E" || state == "M");
 }
 
 void CacheEntry::setLastUsed(int lastUsed) {
@@ -159,6 +162,10 @@ void Cache::setBlockState(int addr, string state) {
 
 string Cache::getBlockState(int addr) {
     return getEntry(addr).getState();
+}
+
+bool Cache::isAddrDirty(int addr) {
+    return getEntry(addr).isModified();
 }
 
 bool Cache::isAddrPrivate(int addr) {

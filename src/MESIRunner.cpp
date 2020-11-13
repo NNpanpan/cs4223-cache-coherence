@@ -37,7 +37,7 @@ void MESIRunner::invalidateO(int cacheID, int addr, bool needWriteBack) {
 
         if (othCache.hasEntry(addr)) {
             // If copy is dirty ('M' state) - only one process holds line
-            if (othCache.isAddrPrivate(addr) && needWriteBack) {
+            if (othCache.isAddrDirty(addr) && needWriteBack) {
                 cacheWriteBackMem(othCacheID, addr);
             }
 
@@ -81,8 +81,8 @@ void MESIRunner::simulateReadMiss(int coreID, int addr) {
 
         Cache& othCache = caches[othCacheID];
         if (othCache.hasEntry(addr)) {
-            if (othCache.isAddrPrivate(addr)) {
-                // Snooped write
+            if (othCache.isAddrDirty(addr)) {
+                // Snooped response triggers flush in cache with M state
                 cacheWriteBackMem(othCacheID, addr);
                 othCache.setBlockState(addr, "S");
             }

@@ -10,8 +10,8 @@ Core::Core(vector<pair<int, int>> traces, int ID) : Device() {
     for(auto trace : traces) {
         traceQ.push(trace);
     }
-    lastCacheReq = -1;
 
+    lastCacheReq = -1;
 
     execCycles = 0;
     compCycles = 0;

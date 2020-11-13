@@ -34,7 +34,7 @@ void Runner::cacheWriteBackMem(int cacheID, int addr) {
     Cache& cache = caches[cacheID];
     int blockNum = cache.getBlockNumber(addr);
 
-    // Memory should not hold block with this address
+    // Memory holds stale copy of this block until flush completes
     assert(invalidBlock[blockNum] == INF);
     invalidBlock[blockNum] = curTime + 100;
 
@@ -165,8 +165,8 @@ bool Runner::checkReleaseCore() {
         int coreID = elem.second;
         Core& core = cores[coreID];
 
+        // Pending request on data bus (block fetch/C2C transfer) is done
         if (core.isFree() || core.isFinish()) {
-            // core requesting the block is done
             doneBlocks.push_back(elem.first);
         }
     }
@@ -179,10 +179,12 @@ bool Runner::checkReleaseCore() {
 }
 
 bool sortCores(const pair<int, pair<int, int>> &a, const pair<int, pair<int, int>> &b) {
-    // First element is Core's NextFree, Second element is Core's lastCacheReq, Third is Core ID
+    // First element is core's nextFree
+    // Second element is core's lastCacheReq, third is core ID
     if (a.first == b.first) {
         return a.second.first < b.second.first;
     }
+
     return a.first < b.first;
 }
 
@@ -197,7 +199,8 @@ bool Runner::checkCoreReq() {
         if (core.isFinish()) continue;  // Freeze finished core
         if (!core.isFree()) continue;
         // coreOrder.push_back(make_pair(core.getNextFree(), coreID));
-        coreOrder.push_back(make_pair(core.getNextFree(), make_pair(core.getLastCacheReq(), coreID)));
+        coreOrder.push_back(make_pair(core.getNextFree(),
+            make_pair(core.getLastCacheReq(), coreID)));
     }
 
     sort(coreOrder.begin(), coreOrder.end(), sortCores);
@@ -220,7 +223,6 @@ bool Runner::checkCoreReq() {
             if (cache.hasEntry(addr)) {
                 // Core always able to proceed if it has the cache line
                 exist = true;
-                // core.popTrace();
                 // Read hit
                 if (traceType == 0) {
                     core.popTrace();
@@ -246,9 +248,10 @@ bool Runner::checkCoreReq() {
             } else {
                 // Can delay cache request and update of stats
                 // Since for cache miss, snooping won't lead to hit
-                if (serveCacheReq || activeBlocks.find(getHeadAddr(addr)) != activeBlocks.end()) {
-                    // Stall core if bus already serving a cache request
-                    // or block request is active
+                if (serveCacheReq ||
+                    activeBlocks.find(getHeadAddr(addr)) != activeBlocks.end()) {
+                    // Stall core if bus already serving a cache request or if
+                    // the requested block is already being requested
                     core.incIdleCycles(1);
                     continue;
                 }
@@ -272,7 +275,7 @@ bool Runner::checkCoreReq() {
             }
 
             // Here: cache request is served by bus
-            // If private access -> update stat 8
+            // If private access (in E or M state) -> update stat 8
             if (cache.isAddrPrivate(addr)) {
                 core.incPrivateAccessCount();
             }
@@ -323,15 +326,6 @@ void Runner::simulate() {
     }
     printStat();
 }
-
-// void Runner::progressTime(int newTime) {
-//     for(auto &core : cores) {
-//         core.progress(newTime - curTime);
-//     }
-
-//     curTime = newTime;
-//     checkMem();
-// }
 
 Runner::~Runner() {
 }

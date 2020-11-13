@@ -22,9 +22,10 @@ protected:
     Bus bus;
 
     static const int INF = 2e9 + 10;
-    // Store blocks that memory is not holding and first moment when it is available
+    // Store blocks being flushed to memory (i.e. memory holds stale value)
+    // along with time write-back completes (i.e. time new value is available)
     map<int, int> invalidBlock;
-    // Store activeBlocks and their request ID.
+    // Store activeBlocks and the ID of the requesting cache
     map<int, int> activeBlocks;
 
     int getHeadAddr(int addr);
