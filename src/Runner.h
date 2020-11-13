@@ -11,6 +11,8 @@ using namespace std;
 
 class Runner {
 protected:
+    bool earlyRet;
+
     int curTime;
 
     int blockSize;
@@ -36,7 +38,7 @@ protected:
 
     bool checkReleaseCore();
     bool checkCoreReq();
-    void progressTime(int newTime);
+    virtual void progressTime(int newTime) = 0;
 
     void printDebug();
 
@@ -47,7 +49,6 @@ public:
     void simulate();
     // virtual bool execCacheReq(CacheReq req) = 0;
 
-    // Note: these function use curTime, so have not counted 1 cycle for cache check yet
     virtual void simulateReadHit(int coreID, int addr) = 0;
     virtual void simulateWriteHit(int coreID, int addr) = 0;
     virtual void simulateReadMiss(int coreID, int addr) = 0;

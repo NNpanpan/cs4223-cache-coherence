@@ -125,6 +125,15 @@ void MESIRunner::simulateWriteMiss(int coreID, int addr) {
     bus.incTrafficBlock();
 }
 
+void MESIRunner::progressTime(int newTime) {
+    for(auto &core : cores) {
+        core.progress(newTime - curTime);
+    }
+
+    curTime = newTime;
+    checkMem();
+}
+
 MESIRunner::~MESIRunner() {
 }
 

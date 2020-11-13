@@ -8,6 +8,8 @@
 /// use 4 state: M, Sc, Sm, E
 class DragonRunner : public Runner {
 private:
+    // contains blocks whose words are on updates
+    map<int, int> broadcastingBlocks;
 
     int countOthCacheHold(int cacheID, int addr);
     void cacheReceiveW(int cacheID, int addr, int sendCycle);
@@ -16,6 +18,8 @@ private:
     int findCacheSourceAvailableTime(int cacheID, int addr);
     int findSourceAvailableTime(int cacheID, int addr);
     void broadcastWOthCache(int cacheID, int addr, int sendCycle);
+protected:
+    void progressTime(int newTime) override;
 public:
     DragonRunner(int cacheSize, int assoc, int blockSize,
         vector<vector<pair<int, int>>> coreTraces);

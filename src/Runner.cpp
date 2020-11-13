@@ -165,12 +165,15 @@ bool Runner::checkReleaseCore() {
         int coreID = elem.second;
         Core& core = cores[coreID];
 
-        if (core.isFree() || core.isFinish()) // core requesting the block is done
+        if (core.isFree() || core.isFinish()) {
+            // core requesting the block is done
             doneBlocks.push_back(elem.first);
+        }
     }
 
-    for (auto block : doneBlocks)
+    for (auto block : doneBlocks) {
         activeBlocks.erase(block);
+    }
 
     return exist;
 }
@@ -227,8 +230,14 @@ bool Runner::checkCoreReq() {
                 if (traceType == 1) {
                     // Can only write if the cache line is not in transaction
                     if (activeBlocks.find(getHeadAddr(addr)) == activeBlocks.end()) {
-                        core.popTrace();
+                        earlyRet = false;
                         simulateWriteHit(cache.getID(), addr);
+                        if (earlyRet) {
+                            core.incIdleCycles(1);
+                            continue;
+                        } else {
+                            core.popTrace();
+                        }
                     } else {
                         core.incIdleCycles(1);
                         continue;
@@ -315,14 +324,14 @@ void Runner::simulate() {
     printStat();
 }
 
-void Runner::progressTime(int newTime) {
-    for(auto &core : cores) {
-        core.progress(newTime - curTime);
-    }
+// void Runner::progressTime(int newTime) {
+//     for(auto &core : cores) {
+//         core.progress(newTime - curTime);
+//     }
 
-    curTime = newTime;
-    checkMem();
-}
+//     curTime = newTime;
+//     checkMem();
+// }
 
 Runner::~Runner() {
 }

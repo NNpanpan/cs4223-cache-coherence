@@ -1,4 +1,6 @@
 #include "DragonRunner.h"
+// #include <bits/stdc++.h>
+// using namespace std;
 
 DragonRunner::DragonRunner(int cacheSize, int assoc, int blockSize,
     vector<vector<pair<int, int>>> coreTraces)
@@ -20,6 +22,7 @@ int DragonRunner::findCacheSourceAvailableTime(int cacheID, int addr) {
     }
     return availableTimeFromOth;
 }
+
 int DragonRunner::findMemSourceAvailableTime(int cacheID, int addr) {
     /// assume there is someway to figure out which is better
     Cache& cache = caches[cacheID];
@@ -29,6 +32,7 @@ int DragonRunner::findMemSourceAvailableTime(int cacheID, int addr) {
     int availableTimeFromMem = getMemBlockAvailableTime(blockNum);
     return availableTimeFromMem;
 }
+
 int DragonRunner::findSourceAvailableTime(int cacheID, int addr) {
     /// assume there is someway to figure out which is better
     Cache& cache = caches[cacheID];
@@ -110,10 +114,14 @@ void DragonRunner::cacheReceiveB(int cacheID, int addr, string state) {
     /// update stat 6
     bus.incTrafficBlock();
 }
+
 void DragonRunner::broadcastWOthCache(int cacheID, int addr, int sendCycle) {
+    // cout << "(to) broadcast word from cache " << cacheID << " at time " << sendCycle << " and done at " << sendCycle+2 << endl;
     /// word broadcast
     int countHold = countOthCacheHold(cacheID, addr);
+    int headAddr = getHeadAddr(addr);
     assert(countHold > 0);
+    broadcastingBlocks[headAddr] = sendCycle + 2;
 
     for(int othCacheID = 0; othCacheID < caches.size(); othCacheID++) {
         if (othCacheID == cacheID) continue;
@@ -126,7 +134,9 @@ void DragonRunner::broadcastWOthCache(int cacheID, int addr, int sendCycle) {
             bus.incUpdateCount();
         }
     }
+    // cout << "(to) broadcast word from cache " << cacheID << " at time " << sendCycle << " and done at " << sendCycle+2 << endl;
 }
+
 void DragonRunner::simulateReadHit(int coreID, int addr) {
     Cache& cache = caches[coreID];
     string state = cache.getBlockState(addr);
@@ -134,7 +144,13 @@ void DragonRunner::simulateReadHit(int coreID, int addr) {
     /// do nothing, set last use and done
     cache.setBlockLastUsed(addr, curTime);
 }
+
 void DragonRunner::simulateWriteHit(int coreID, int addr) {
+    if (broadcastingBlocks.find(getHeadAddr(addr)) != broadcastingBlocks.end()) {
+        earlyRet = true;
+        return;
+    }
+
     int cacheID = coreID;
     Cache& cache = caches[coreID];
     string state = cache.getBlockState(addr);
@@ -197,6 +213,30 @@ void DragonRunner::simulateWriteMiss(int coreID, int addr) {
     /// memory does not hold this block
     int blockNum = cache.getBlockNumber(addr);
     invalidBlock[blockNum] = INF;
+}
+
+void DragonRunner::progressTime(int newTime) {
+    for(auto &core : cores) {
+        core.progress(newTime - curTime);
+    }
+
+    curTime = newTime;
+    checkMem();
+
+    vector<int> doneBlocks;
+    for (auto elem : broadcastingBlocks) {
+        int expiry = elem.second;
+
+        if (curTime >= expiry) {
+            // A block with a word broadcast
+            doneBlocks.push_back(elem.first);
+        }
+    }
+
+    for (auto block : doneBlocks) {
+        // cout << "Cycle " << curTime << " done broadcast word of block " << block << endl;
+        broadcastingBlocks.erase(block);
+    }
 }
 
 DragonRunner::~DragonRunner() {
