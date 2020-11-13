@@ -16,7 +16,7 @@ class Core : public Device {
 private:
     int ID;
 
-    int lastCacheReq;
+    int lastBusAccess;
 
     // For tracking execution statistics
     int execCycles;         // Stat 1
@@ -42,8 +42,8 @@ public:
 
     int getID();
 
-    int getLastCacheReq();
-    void setLastCacheReq(int time);
+    int getLastBusAccess();
+    void setLastBusAccess(int time);
 
     void incLoadCount();
     int getLoadCount();

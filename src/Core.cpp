@@ -11,7 +11,7 @@ Core::Core(vector<pair<int, int>> traces, int ID) : Device() {
         traceQ.push(trace);
     }
 
-    lastCacheReq = -1;
+    lastBusAccess = -1;
 
     execCycles = 0;
     compCycles = 0;
@@ -23,12 +23,12 @@ Core::Core(vector<pair<int, int>> traces, int ID) : Device() {
     privateAccessCount = 0;
 }
 
-int Core::getLastCacheReq() {
-    return lastCacheReq;
+int Core::getLastBusAccess() {
+    return lastBusAccess;
 }
 
-void Core::setLastCacheReq(int time) {
-    lastCacheReq = time;
+void Core::setLastBusAccess(int time) {
+    lastBusAccess = time;
 }
 
 bool Core::isFinish() {

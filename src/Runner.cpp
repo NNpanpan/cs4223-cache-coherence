@@ -200,7 +200,7 @@ bool Runner::checkCoreReq() {
         if (!core.isFree()) continue;
         // coreOrder.push_back(make_pair(core.getNextFree(), coreID));
         coreOrder.push_back(make_pair(core.getNextFree(),
-            make_pair(core.getLastCacheReq(), coreID)));
+            make_pair(core.getLastBusAccess(), coreID)));
     }
 
     sort(coreOrder.begin(), coreOrder.end(), sortCores);
@@ -262,7 +262,7 @@ bool Runner::checkCoreReq() {
                 // Cache miss -> update stat 5
                 core.incCacheMissCount();
                 activeBlocks[getHeadAddr(addr)] = coreID;
-                core.setLastCacheReq(curTime);
+                core.setLastBusAccess(curTime);
 
                 // Read miss
                 if (traceType == 0) {
