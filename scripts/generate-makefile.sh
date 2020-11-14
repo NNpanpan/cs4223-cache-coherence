@@ -5,8 +5,7 @@ bin_path="../coherence"
 time_string="\nreal %es\nuser %Us\nsys %S\nCPU %P\ncontext-switches %c vol %w invol\npage-faults %F maj %R min\nswaps %W\n"
 sim_string="/usr/bin/time -f \$(FORMAT) ${bin_path}"
 
-protocols=("MESI" "Dragon")
-# protocols=("MESI" "Dragon" "MESIF")
+protocols=("MESI" "Dragon" "MESIF")
 benchmarks=("blackscholes" "bodytrack" "fluidanimate")
 
 # Default simulation parameters
