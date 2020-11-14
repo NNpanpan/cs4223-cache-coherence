@@ -1,6 +1,8 @@
 #include <bits/stdc++.h>
+
 #include "src/MESIRunner.h"
 #include "src/DragonRunner.h"
+#include "src/MESIFRunner.h"
 
 using namespace std;
 
@@ -51,8 +53,11 @@ void simulate(string protocol, int cacheSize, int assoc, int blockSize,
         runner = new MESIRunner(cacheSize, assoc, blockSize, ops);
     } else if (protocol == "Dragon" || protocol == "dragon") {
         runner = new DragonRunner(cacheSize, assoc, blockSize, ops);
-    } else {
-        cerr << "Unknown coherence protocol (should be MESI or Dragon): " << protocol << "\n\n";
+    } else if (protocol == "MESIF" || protocol == "mesif") {
+        runner = new MESIFRunner(cacheSize, assoc, blockSize, ops);
+    } else{
+        cerr << "Unknown coherence protocol (should be MESI, Dragon or MESIF): "
+             << protocol << "\n\n";
         exit(-1);
     }
 
