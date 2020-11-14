@@ -6,7 +6,8 @@ DragonRunner::DragonRunner(int cacheSize, int assoc, int blockSize,
 }
 
 int DragonRunner::findCacheSourceAvailableTime(int cacheID, int addr) {
-    /// assume there is someway to figure out which is better
+    // Assuming cache controller can determine data source with lowest latency
+    // between main memory and another cache
     int availableTimeFromOth = INF;
 
     for(int othCacheID = 0; othCacheID < (int) caches.size(); othCacheID++) {
@@ -21,7 +22,8 @@ int DragonRunner::findCacheSourceAvailableTime(int cacheID, int addr) {
 }
 
 int DragonRunner::findMemSourceAvailableTime(int cacheID, int addr) {
-    /// assume there is someway to figure out which is better
+    // Assuming cache controller can determine data source with lowest latency
+    // between main memory and another cache
     Cache& cache = caches[cacheID];
 
     int blockNum = cache.getBlockNumber(addr);
@@ -31,7 +33,8 @@ int DragonRunner::findMemSourceAvailableTime(int cacheID, int addr) {
 }
 
 int DragonRunner::findSourceAvailableTime(int cacheID, int addr) {
-    /// assume there is someway to figure out which is better
+    // Assuming cache controller can determine data source with lowest latency
+    // between main memory and another cache
     int availableTimeFromMem = findMemSourceAvailableTime(cacheID, addr);
     int availableTimeFromCache = findCacheSourceAvailableTime(cacheID, addr);
     return min(availableTimeFromMem + 100,
@@ -54,15 +57,15 @@ void DragonRunner::cacheReceiveW(int cacheID, int addr, int sendCycle) {
     Cache& cache = caches[cacheID];
     assert(cache.hasEntry(addr));
 
-    /// 2 cycles
+    // 2 cycles to transmit updated word (after which block marked as valid)
     cache.setBlockValidFrom(addr, sendCycle + 2);
 
-    /// update stat 6
+    // Update stat 6
     bus.incTrafficWord();
 }
 
 void DragonRunner::cacheReceiveB(int cacheID, int addr, string state) {
-    /// passive receive
+    // Passive receipt of block
     Cache& cache = caches[cacheID];
     assert(!cache.hasEntry(addr));
 
@@ -73,45 +76,57 @@ void DragonRunner::cacheReceiveB(int cacheID, int addr, string state) {
 
     int cacheAvailableTime = max(findCacheSourceAvailableTime(cacheID, addr), curTime);
     int memAvailableTime = max(findMemSourceAvailableTime(cacheID, addr), curTime);
-    // int availableTime = min(memAvailableTime + 100, cacheAvailableTime + 2 * bus.getWordPerBlock());
+    /*
+    int availableTime = min(memAvailableTime + 100,
+        cacheAvailableTime + 2 * bus.getWordPerBlock());
+    */
+
+    // Serve from memory if no cache holds a copy, else perform C2C transfer
     int availableTime = cacheAvailableTime == INF 
         ? memAvailableTime + 100 
         : cacheAvailableTime + 2 * bus.getWordPerBlock();
 
-    /// assuming evict before alloc
+    // Pre-condition: find an available line (evict one if none available)
     CacheEntry evictedEntry = cache.evictEntry(addr);
-    /// if that entry is valid, mean cache set conflict
+    // If entry is valid, this is the victim block (cache set conflict)
     if (!evictedEntry.isInvalid()) {
-        /// need to rewrite if mem does not hold and is last copy in caches
         int evictedAddr = cache.getHeadAddr(evictedEntry);
         int evictedBlockNum = cache.getBlockNumber(evictedAddr);
         bool needRewrite = (getMemBlockAvailableTime(evictedBlockNum) == INF 
-            && countOthCacheHold(cacheID, evictedAddr) == 0); 
+            && countOthCacheHold(cacheID, evictedAddr) == 0);
+
+        // Perform write-back to update mem if memory holds a stale copy and
+        // the evicted line is the last copy amongst all caches
         if (needRewrite) {
             cacheWriteBackMem(cacheID, evictedAddr);
 
+            /*
+             * No additional latency to fill line after eviction with write-back
+             * (assuming use of line fill buffer and write-back buffer)
+             *
             int newMemAvailableTime = max(curTime + 100, memAvailableTime);
             int newCacheAvailableTime = max(curTime + 100, cacheAvailableTime);
-            // availableTime = min(newMemAvailableTime + 100, newCacheAvailableTime + 2 * bus.getWordPerBlock()); /// 100 cycles first to evict this addr
+            availableTime = min(newMemAvailableTime + 100,
+                newCacheAvailableTime + 2 * bus.getWordPerBlock());
             availableTime = newCacheAvailableTime == INF 
                 ? newMemAvailableTime + 100 
                 : newCacheAvailableTime + 2 * bus.getWordPerBlock();
-
-            /*
             availableTime = max(availableTime, curTime + 100);
-            */
+             */
         }
     }
 
     cache.allocEntry(addr, state, curTime, availableTime);
 
-    /// update stat 6
+    // Update stat 6
     bus.incTrafficBlock();
 }
 
 void DragonRunner::broadcastWOthCache(int cacheID, int addr, int sendCycle) {
-    // cout << "(to) broadcast word from cache " << cacheID << " at time " << sendCycle << " and done at " << sendCycle+2 << endl;
-    /// word broadcast
+    // cout << "(to) broadcast word from cache " << cacheID << " at time "
+    //     << sendCycle << " and done at " << sendCycle+2 << endl;
+
+    // Broadcast a word to other caches (update)
     int countHold = countOthCacheHold(cacheID, addr);
     int headAddr = getHeadAddr(addr);
     assert(countHold > 0);
@@ -124,18 +139,20 @@ void DragonRunner::broadcastWOthCache(int cacheID, int addr, int sendCycle) {
             cacheReceiveW(othCacheID, addr, sendCycle);
             othCache.setBlockState(addr, "Sc");
 
-            /// update stat 7
+            // Update stat 7
             bus.incUpdateCount();
         }
     }
-    // cout << "(to) broadcast word from cache " << cacheID << " at time " << sendCycle << " and done at " << sendCycle+2 << endl;
+
+    // cout << "(to) broadcast word from cache " << cacheID << " at time "
+    //     << sendCycle << " and done at " << sendCycle+2 << endl;
 }
 
 void DragonRunner::simulateReadHit(int coreID, int addr) {
     Cache& cache = caches[coreID];
     string state = cache.getBlockState(addr);
     
-    /// do nothing, set last use and done
+    // Do nothing; set last used and done
     cache.setBlockLastUsed(addr, curTime);
 }
 
@@ -150,18 +167,17 @@ void DragonRunner::simulateWriteHit(int coreID, int addr) {
     string state = cache.getBlockState(addr);
     cache.setBlockLastUsed(addr, curTime);
 
-
     if (state == "M") {
-        /// do nothing
+        // Do nothing
     }
 
     if (state == "Sc" || state == "Sm") {
-        /// check if cache should go to 'M' or 'Sm'
+        // Check if cache should transition to 'M' or 'Sm'
         int countHold = countOthCacheHold(coreID, addr);
 
         string addrState = (countHold == 0) ? "M" : "Sm";
         if (addrState == "Sm") {
-            /// broadcast to other caches a word
+            // Broadcast the modified word to other caches
             broadcastWOthCache(cacheID, addr, curTime);
         } else {
             /// do nothing
@@ -170,11 +186,11 @@ void DragonRunner::simulateWriteHit(int coreID, int addr) {
     }
 
     if (state == "E") {
-        /// go to M
+        // Transition to 'M'
         cache.setBlockState(addr, "M");
     }
 
-    /// memory does not hold this block
+    // Mem does not hold an updated copy
     int blockNum = cache.getBlockNumber(addr);
     invalidBlock[blockNum] = INF;
 }
@@ -192,18 +208,17 @@ void DragonRunner::simulateWriteMiss(int coreID, int addr) {
 
     string state = (countHold == 0) ? "M" : "Sm";
 
-
     if (state == "M") {
         cacheReceiveB(coreID, addr, "M");
     } else {
-        /// need to receive a block broadcast and then broadcast a word to other cache
+        // Receive a block transfer, then broadcast the updated word to others
         cacheReceiveB(coreID, addr, "Sm");
 
         int sendTime = cache.getAddrUsableTime(addr);
         broadcastWOthCache(cacheID, addr, sendTime);
     }
 
-    /// memory does not hold this block
+    // Memory does not hold latest copy of this block
     int blockNum = cache.getBlockNumber(addr);
     invalidBlock[blockNum] = INF;
 }
@@ -221,16 +236,19 @@ void DragonRunner::progressTime(int newTime) {
         int expiry = elem.second;
 
         if (curTime >= expiry) {
-            // A block with a word broadcast
+            // A block with a word broadcasted via BusUpd that completed
             doneBlocks.push_back(elem.first);
         }
     }
 
+    // Resume bus transactions for blocks whose BusUpd completed
     for (auto block : doneBlocks) {
-        // cout << "Cycle " << curTime << " done broadcast word of block " << block << endl;
+        // cout << "Cycle " << curTime << " done broadcast word of block "
+        //      << block << endl;
         broadcastingBlocks.erase(block);
     }
 }
 
 DragonRunner::~DragonRunner() {
 }
+

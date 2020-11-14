@@ -10,7 +10,8 @@ bool MESIRunner::cacheAllocAddr(int cacheID, int addr, string addrState) {
     Cache& cache = caches[cacheID];
     int blockNum = cache.getBlockNumber(addr);
 
-    // Data only available from memory after additional 100 cycles
+    // Determine earliest time requested block (incl. all pending write-backs)
+    // is available from memory
     int availableTime = getMemBlockAvailableTime(blockNum) + 100;
 
     // Pre-condition: find an available line (evict one if none available)
@@ -21,7 +22,6 @@ bool MESIRunner::cacheAllocAddr(int cacheID, int addr, string addrState) {
         if (evictedEntry.getState() == "M") {
             int evictedAddr = cache.getHeadAddr(evictedEntry);
             cacheWriteBackMem(cacheID, evictedAddr);
-            availableTime += 100;   // Need 100 cycles to write-back this block
         }
     }
 
