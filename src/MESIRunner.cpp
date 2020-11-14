@@ -117,7 +117,7 @@ void MESIRunner::simulateWriteMiss(int coreID, int addr) {
     string addrState = "M";
     cacheAllocAddr(cacheID, addr, addrState);
 
-    // Mme does not hold an updated copy
+    // Memory does not hold an updated copy
     int blockNum = cache.getBlockNumber(addr);
     invalidBlock[blockNum] = INF;
 

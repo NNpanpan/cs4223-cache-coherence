@@ -1,6 +1,4 @@
 #include "DragonRunner.h"
-// #include <bits/stdc++.h>
-// using namespace std;
 
 DragonRunner::DragonRunner(int cacheSize, int assoc, int blockSize,
     vector<vector<pair<int, int>>> coreTraces)
@@ -9,10 +7,9 @@ DragonRunner::DragonRunner(int cacheSize, int assoc, int blockSize,
 
 int DragonRunner::findCacheSourceAvailableTime(int cacheID, int addr) {
     /// assume there is someway to figure out which is better
-    Cache& cache = caches[cacheID];
     int availableTimeFromOth = INF;
 
-    for(int othCacheID = 0; othCacheID < caches.size(); othCacheID++) {
+    for(int othCacheID = 0; othCacheID < (int) caches.size(); othCacheID++) {
         if (othCacheID == cacheID) continue;
         Cache& othCache = caches[othCacheID];
         if (othCache.hasEntry(addr)) {
@@ -35,9 +32,6 @@ int DragonRunner::findMemSourceAvailableTime(int cacheID, int addr) {
 
 int DragonRunner::findSourceAvailableTime(int cacheID, int addr) {
     /// assume there is someway to figure out which is better
-    Cache& cache = caches[cacheID];
-
-    int blockNum = cache.getBlockNumber(addr);
     int availableTimeFromMem = findMemSourceAvailableTime(cacheID, addr);
     int availableTimeFromCache = findCacheSourceAvailableTime(cacheID, addr);
     return min(availableTimeFromMem + 100,
@@ -46,7 +40,7 @@ int DragonRunner::findSourceAvailableTime(int cacheID, int addr) {
 
 int DragonRunner::countOthCacheHold(int cacheID, int addr) {
     int countHold = 0;
-    for(int othCacheID = 0; othCacheID < caches.size(); othCacheID++) {
+    for(int othCacheID = 0; othCacheID < (int) caches.size(); othCacheID++) {
         if (othCacheID == cacheID) continue;
         Cache& othCache = caches[othCacheID];
         if (othCache.hasEntry(addr)) {
@@ -123,7 +117,7 @@ void DragonRunner::broadcastWOthCache(int cacheID, int addr, int sendCycle) {
     assert(countHold > 0);
     broadcastingBlocks[headAddr] = sendCycle + 2;
 
-    for(int othCacheID = 0; othCacheID < caches.size(); othCacheID++) {
+    for(int othCacheID = 0; othCacheID < (int) caches.size(); othCacheID++) {
         if (othCacheID == cacheID) continue;
         Cache& othCache = caches[othCacheID];
         if (othCache.hasEntry(addr)) {
@@ -186,7 +180,6 @@ void DragonRunner::simulateWriteHit(int coreID, int addr) {
 }
 
 void DragonRunner::simulateReadMiss(int coreID, int addr) {
-    Cache& cache = caches[coreID];
     int countHold = countOthCacheHold(coreID, addr);
     string state = (countHold == 0) ? "E" : "Sc";
     cacheReceiveB(coreID, addr, state);

@@ -192,13 +192,11 @@ bool Runner::checkCoreReq() {
     bool exist = false;
     bool serveCacheReq = false;
 
-    // vector<pair<int, int>> coreOrder;
     vector<pair<int, pair<int, int>>> coreOrder;
     for(int coreID = 0; coreID < (int) cores.size(); coreID++) {
         Core& core = cores[coreID];
         if (core.isFinish()) continue;  // Freeze finished core
         if (!core.isFree()) continue;
-        // coreOrder.push_back(make_pair(core.getNextFree(), coreID));
         coreOrder.push_back(make_pair(core.getNextFree(),
             make_pair(core.getLastBusAccess(), coreID)));
     }
@@ -230,16 +228,15 @@ bool Runner::checkCoreReq() {
                 }
                 // Write hit
                 if (traceType == 1) {
-                    // Can only write if the cache line is not in transaction
+                    // Can only write if block is not in outstanding request
                     if (activeBlocks.find(getHeadAddr(addr)) == activeBlocks.end()) {
                         earlyRet = false;
                         simulateWriteHit(cache.getID(), addr);
                         if (earlyRet) {
                             core.incIdleCycles(1);
                             continue;
-                        } else {
-                            core.popTrace();
                         }
+                        core.popTrace();
                     } else {
                         core.incIdleCycles(1);
                         continue;
