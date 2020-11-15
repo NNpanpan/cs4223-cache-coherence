@@ -1,21 +1,14 @@
-# cs4223-cache-coherence
+# CS4223-cache-coherence
 
 
-# Assumption
+# Cache coherence protocols
 
-201014: 
+MESI, Dragon and MESIF
 
-no of compute cycles not include idle time
+# How to run code
 
-invalidate takes 1 cache access = 1 cycle
+Compile: `make all`
 
-write -> dirty
+Run: `./coherence <protocol> <benchmark> <cache size> <associativity> <block size>`
 
-use Illinois MESI 
-
-201022:
-
-cache states: busy - someone is accessing, idle_wait - waiting for busOp
-
-tie-break for busOp = core/cache ID -> core/cache has ID
-
+Example: `./coherence MESI bodytrack 4096 2 16`
