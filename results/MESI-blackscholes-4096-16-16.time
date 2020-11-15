@@ -1,0 +1,85 @@
+Cycles 0
+4994697 4980935 5018113 5006253 
+Cycles 1000000
+4703665 4652246 4969336 4680803 
+Cycles 2000000
+4334129 4283642 4621523 4311384 
+Cycles 3000000
+3971563 3919369 4252806 3947723 
+Cycles 4000000
+3605003 3552723 3896338 3583485 
+Cycles 5000000
+3241287 3188158 3529449 3217984 
+Cycles 6000000
+2872085 2818692 3164503 2848816 
+Cycles 7000000
+2501569 2449169 2795065 2478338 
+Cycles 8000000
+2139697 2084569 2426083 2114481 
+Cycles 9000000
+1770355 1715153 2061239 1744647 
+Cycles 10000000
+1407447 1350006 1691771 1382390 
+Cycles 11000000
+1038281 981571 1327553 1013013 
+Cycles 12000000
+669097 612001 959141 643937 
+Cycles 13000000
+305483 247529 589478 279361 
+Cycles 14000000
+0 0 225147 0 
+Stat 1: (Exec time)
+Core 0: 13826279 cycle(s)
+Core 1: 13669769 cycle(s)
+Core 2: 14607720 cycle(s)
+Core 3: 13755928 cycle(s)
+Total: 14607720 cycle(s)
+------------------------------------
+Stat 2: (Compute time)
+Core 0: 10430314 cycle(s)
+Core 1: 10383276 cycle(s)
+Core 2: 10430338 cycle(s)
+Core 3: 10394904 cycle(s)
+------------------------------------
+Stat 3: (Load/Store)
+Core 0: 1489888 load(s), 1007461 store(s)
+Core 1: 1485857 load(s), 1004611 store(s)
+Core 2: 1492629 load(s), 1016428 store(s)
+Core 3: 1493736 load(s), 1009391 store(s)
+------------------------------------
+Stat 4: (Idle time)
+Core 0: 3395965 cycle(s)
+Core 1: 3286493 cycle(s)
+Core 2: 4177382 cycle(s)
+Core 3: 3361024 cycle(s)
+------------------------------------
+Stat 5: (Cache miss rate)
+Core 0: 0.36%
+Core 1: 0.32%
+Core 2: 0.66%
+Core 3: 0.34%
+------------------------------------
+Stat 6: (Bus traffic amount)
+870432 byte(s)
+------------------------------------
+Stat 7: (Invalidation / Update / Write-back)
+Invalidation: 421 time(s)
+Update: 0 time(s)
+Write-back: 12728 time(s)
+------------------------------------
+Stat 8: (Private access distribution)
+Per core
+Core 0: 2008277 / 2497349 = 80.42%
+Core 1: 2250370 / 2490468 = 90.36%
+Core 2: 2038201 / 2509057 = 81.23%
+Core 3: 2050405 / 2503127 = 81.91%
+Total : 8347253 / 10000001 = 83.47%
+
+real 320.71s
+user 319.15s
+sys 1.51
+CPU 99%
+context-switches 204 vol 7 invol
+page-faults 0 maj 311038 min
+swaps 0
+
